@@ -1,0 +1,90 @@
+{
+  "aum_2B": {
+    "aum0_usd": 2000000000.0,
+    "aegisflow": {
+      "net_pnl": 15378994.868785024,
+      "net_apy_pct": 1.9440133392556902,
+      "overdraft_hours": 4939,
+      "overdraft_interest": 6792185.483465766,
+      "haircuts_usd": 830210.7048108093
+    },
+    "baseline0_cash": {
+      "net_pnl": -6925079.932169437,
+      "net_apy_pct": -0.8753789098970446,
+      "overdraft_hours": 1684,
+      "overdraft_interest": 6925079.932167383
+    },
+    "baseline2_static": {
+      "net_pnl": -117026343.38559937,
+      "net_apy_pct": -14.792954580385734,
+      "overdraft_hours": 1999,
+      "haircuts_usd": 82910441.54978837
+    }
+  },
+  "aum_3B": {
+    "aum0_usd": 3000000000.0,
+    "aegisflow": {
+      "net_pnl": 61367358.87371194,
+      "net_apy_pct": 3.4262478758791683,
+      "overdraft_hours": 4140,
+      "overdraft_interest": 457492.5044244388,
+      "haircuts_usd": 12132061.298775977
+    },
+    "baseline0_cash": {
+      "net_pnl": 4.172325134277344e-07,
+      "net_apy_pct": 2.3294827072831333e-14,
+      "overdraft_hours": 0,
+      "overdraft_interest": 0.0
+    },
+    "baseline2_static": {
+      "net_pnl": -203336347.2575323,
+      "net_apy_pct": -11.352626879606307,
+      "overdraft_hours": 0,
+      "haircuts_usd": 62506507.649731025
+    }
+  },
+  "aum_5B": {
+    "aum0_usd": 5000000000.0,
+    "aegisflow": {
+      "net_pnl": 174205992.89786053,
+      "net_apy_pct": 4.595136415410907,
+      "overdraft_hours": 4116,
+      "overdraft_interest": 447867.16907632706,
+      "haircuts_usd": 10545467.027986113
+    },
+    "baseline0_cash": {
+      "net_pnl": -2.2411346435546875e-05,
+      "net_apy_pct": -5.911575854038006e-13,
+      "overdraft_hours": 0,
+      "overdraft_interest": 0.0
+    },
+    "baseline2_static": {
+      "net_pnl": -211568253.67577553,
+      "net_apy_pct": -5.580663274772955,
+      "overdraft_hours": 0,
+      "haircuts_usd": 1278230.012494635
+    }
+  },
+  "aum_10B": {
+    "aum0_usd": 10000000000.0,
+    "aegisflow": {
+      "net_pnl": 454551457.39683914,
+      "net_apy_pct": 5.170589677783688,
+      "overdraft_hours": 4049,
+      "overdraft_interest": 419635.69554589444,
+      "haircuts_usd": 2594061.275159264
+    },
+    "baseline0_cash": {
+      "net_pnl": 1.9073486328125e-06,
+      "net_apy_pct": 2.1696371207859032e-14,
+      "overdraft_hours": 0,
+      "overdraft_interest": 0.0
+    },
+    "baseline2_static": {
+      "net_pnl": -404253362.5139189,
+      "net_apy_pct": -4.598441451259004,
+      "overdraft_hours": 0,
+      "haircuts_usd": 0.0
+    }
+  }
+}

@@ -1,0 +1,1063 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AegisFlow Algorithmic Treasury & Liquidity Engine",
+    "description": "Institutional-grade treasury management API for digital banking platforms moving >$20M/hr.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "Metadata & Theorems"
+        ],
+        "summary": "Health Check",
+        "operationId": "health_check_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meta/config": {
+      "get": {
+        "tags": [
+          "Metadata & Theorems"
+        ],
+        "summary": "Get Config",
+        "operationId": "get_config_api_meta_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/theorems": {
+      "get": {
+        "tags": [
+          "Metadata & Theorems"
+        ],
+        "summary": "Get Theorems",
+        "description": "Live quantitative break-even calculations for the Stitch UI 'Why' explanation panel.",
+        "operationId": "get_theorems_api_theorems_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stream/tick": {
+      "get": {
+        "tags": [
+          "Streaming Replay"
+        ],
+        "summary": "Get Stream Tick",
+        "operationId": "get_stream_tick_api_stream_tick_get",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 8759,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Index"
+            }
+          },
+          {
+            "name": "ts",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ts"
+            }
+          },
+          {
+            "name": "strategies",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "aegisflow,baseline2_static",
+              "title": "Strategies"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamTickResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stream/range": {
+      "get": {
+        "tags": [
+          "Streaming Replay"
+        ],
+        "summary": "Get Stream Range",
+        "operationId": "get_stream_range_api_stream_range_get",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 8759,
+              "minimum": 0,
+              "default": 0,
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 8759,
+              "minimum": 0,
+              "default": 100,
+              "title": "To"
+            }
+          },
+          {
+            "name": "stride",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 168,
+              "minimum": 1,
+              "default": 1,
+              "title": "Stride"
+            }
+          },
+          {
+            "name": "strategies",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "aegisflow,baseline2_static",
+              "title": "Strategies"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamRangeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backtest/compare": {
+      "get": {
+        "tags": [
+          "Backtest & Alpha"
+        ],
+        "summary": "Get Backtest Compare",
+        "description": "Retrieve full 4-strategy comparative performance, KPIs, and equity curves.",
+        "operationId": "get_backtest_compare_api_backtest_compare_get",
+        "parameters": [
+          {
+            "name": "aum0",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 100000000.0,
+              "default": 3000000000.0,
+              "title": "Aum0"
+            }
+          },
+          {
+            "name": "risk_mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "cost_optimal",
+              "title": "Risk Mode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backtest/ablations": {
+      "get": {
+        "tags": [
+          "Backtest & Alpha"
+        ],
+        "summary": "Get Ablations",
+        "description": "Retrieve ablation ladder isolating component alpha contributions.",
+        "operationId": "get_ablations_api_backtest_ablations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backtest/frontier": {
+      "get": {
+        "tags": [
+          "Backtest & Alpha"
+        ],
+        "summary": "Get Safety Frontier",
+        "description": "Retrieve Price-of-Safety frontier points across tolerance and overdraft caps.",
+        "operationId": "get_safety_frontier_api_backtest_frontier_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backtest/sensitivity": {
+      "get": {
+        "tags": [
+          "Backtest & Alpha"
+        ],
+        "summary": "Get Aum Sensitivity",
+        "description": "Retrieve AUM sensitivity across $2B, $3B, $5B, $10B starting capital.",
+        "operationId": "get_aum_sensitivity_api_backtest_sensitivity_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backtest/run": {
+      "post": {
+        "tags": [
+          "Backtest & Alpha"
+        ],
+        "summary": "Run Custom Backtest",
+        "description": "Execute synchronous custom backtest run (< 5s runtime).",
+        "operationId": "run_custom_backtest_api_backtest_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BacktestRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/simulate/presets": {
+      "get": {
+        "tags": [
+          "Stress Testing & Chaos"
+        ],
+        "summary": "Get Stress Presets",
+        "description": "Retrieve preconfigured institutional stress-test presets.",
+        "operationId": "get_stress_presets_api_simulate_presets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/simulate/stress-test": {
+      "post": {
+        "tags": [
+          "Stress Testing & Chaos"
+        ],
+        "summary": "Execute Stress Test",
+        "description": "Execute dynamic chaos injection simulation on shocked data (< 3s runtime).",
+        "operationId": "execute_stress_test_api_simulate_stress_test_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StressSimulationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/logs/decisions": {
+      "get": {
+        "tags": [
+          "Audit Log"
+        ],
+        "summary": "Get Decisions",
+        "description": "Query structured institutional audit logs with filtering and pagination.",
+        "operationId": "get_decisions_api_logs_decisions_get",
+        "parameters": [
+          {
+            "name": "strategy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Strategy"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BacktestRunRequest": {
+        "properties": {
+          "aum0": {
+            "type": "number",
+            "minimum": 100000000.0,
+            "title": "Aum0",
+            "default": 3000000000.0
+          },
+          "risk_mode": {
+            "type": "string",
+            "title": "Risk Mode",
+            "default": "cost_optimal"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "default": 42
+          }
+        },
+        "type": "object",
+        "title": "BacktestRunRequest"
+      },
+      "FlowTick": {
+        "properties": {
+          "deposits": {
+            "type": "number",
+            "title": "Deposits"
+          },
+          "withdrawals": {
+            "type": "number",
+            "title": "Withdrawals"
+          },
+          "net": {
+            "type": "number",
+            "title": "Net"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deposits",
+          "withdrawals",
+          "net"
+        ],
+        "title": "FlowTick"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "dataset_hours": {
+            "type": "integer",
+            "title": "Dataset Hours"
+          },
+          "artifacts_ready": {
+            "type": "boolean",
+            "title": "Artifacts Ready"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "dataset_hours",
+          "artifacts_ready"
+        ],
+        "title": "HealthResponse"
+      },
+      "MarketTick": {
+        "properties": {
+          "repo_apy": {
+            "type": "number",
+            "title": "Repo Apy"
+          },
+          "bond_yield": {
+            "type": "number",
+            "title": "Bond Yield"
+          },
+          "bond_price": {
+            "type": "number",
+            "title": "Bond Price"
+          },
+          "equity_price": {
+            "type": "number",
+            "title": "Equity Price"
+          },
+          "equity_vol_realized": {
+            "type": "number",
+            "title": "Equity Vol Realized"
+          },
+          "hour": {
+            "type": "integer",
+            "title": "Hour"
+          },
+          "repo_window_open": {
+            "type": "boolean",
+            "title": "Repo Window Open"
+          },
+          "repo_mature": {
+            "type": "boolean",
+            "title": "Repo Mature"
+          }
+        },
+        "type": "object",
+        "required": [
+          "repo_apy",
+          "bond_yield",
+          "bond_price",
+          "equity_price",
+          "equity_vol_realized",
+          "hour",
+          "repo_window_open",
+          "repo_mature"
+        ],
+        "title": "MarketTick"
+      },
+      "StrategyBalances": {
+        "properties": {
+          "cash": {
+            "type": "number",
+            "title": "Cash"
+          },
+          "repo": {
+            "type": "number",
+            "title": "Repo"
+          },
+          "bond_mv": {
+            "type": "number",
+            "title": "Bond Mv"
+          },
+          "equity_mv": {
+            "type": "number",
+            "title": "Equity Mv"
+          },
+          "overdraft": {
+            "type": "number",
+            "title": "Overdraft"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cash",
+          "repo",
+          "bond_mv",
+          "equity_mv",
+          "overdraft"
+        ],
+        "title": "StrategyBalances"
+      },
+      "StrategyCumCosts": {
+        "properties": {
+          "repo_interest": {
+            "type": "number",
+            "title": "Repo Interest"
+          },
+          "bond_carry": {
+            "type": "number",
+            "title": "Bond Carry"
+          },
+          "capital_pnl": {
+            "type": "number",
+            "title": "Capital Pnl"
+          },
+          "haircuts": {
+            "type": "number",
+            "title": "Haircuts"
+          },
+          "od_interest": {
+            "type": "number",
+            "title": "Od Interest"
+          }
+        },
+        "type": "object",
+        "required": [
+          "repo_interest",
+          "bond_carry",
+          "capital_pnl",
+          "haircuts",
+          "od_interest"
+        ],
+        "title": "StrategyCumCosts"
+      },
+      "StrategyTickState": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "overlays": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Overlays"
+          },
+          "balances": {
+            "$ref": "#/components/schemas/StrategyBalances"
+          },
+          "nav": {
+            "type": "number",
+            "title": "Nav"
+          },
+          "econ_pnl": {
+            "type": "number",
+            "title": "Econ Pnl"
+          },
+          "drawdown": {
+            "type": "number",
+            "title": "Drawdown"
+          },
+          "cum": {
+            "$ref": "#/components/schemas/StrategyCumCosts"
+          },
+          "action": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Action"
+          },
+          "forecast": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Forecast"
+          },
+          "gatekeeper": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gatekeeper"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state",
+          "overlays",
+          "balances",
+          "nav",
+          "econ_pnl",
+          "drawdown",
+          "cum",
+          "action",
+          "forecast"
+        ],
+        "title": "StrategyTickState"
+      },
+      "StreamRangeResponse": {
+        "properties": {
+          "stride": {
+            "type": "integer",
+            "title": "Stride"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "ticks": {
+            "items": {
+              "$ref": "#/components/schemas/StreamTickResponse"
+            },
+            "type": "array",
+            "title": "Ticks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stride",
+          "count",
+          "ticks"
+        ],
+        "title": "StreamRangeResponse"
+      },
+      "StreamTickResponse": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "market": {
+            "$ref": "#/components/schemas/MarketTick"
+          },
+          "flows": {
+            "$ref": "#/components/schemas/FlowTick"
+          },
+          "strategies": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/StrategyTickState"
+            },
+            "type": "object",
+            "title": "Strategies"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "timestamp",
+          "market",
+          "flows",
+          "strategies"
+        ],
+        "title": "StreamTickResponse"
+      },
+      "StressShockRequest": {
+        "properties": {
+          "withdrawal_multiplier": {
+            "type": "number",
+            "maximum": 5.0,
+            "minimum": 0.5,
+            "title": "Withdrawal Multiplier",
+            "default": 1.0
+          },
+          "deposit_multiplier": {
+            "type": "number",
+            "maximum": 2.0,
+            "minimum": 0.5,
+            "title": "Deposit Multiplier",
+            "default": 1.0
+          },
+          "window": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Window"
+          },
+          "run_event": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Event"
+          },
+          "rate_shock_bps": {
+            "type": "number",
+            "maximum": 500.0,
+            "minimum": -500.0,
+            "title": "Rate Shock Bps",
+            "default": 0.0
+          },
+          "rate_shock_ramp_hours": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Rate Shock Ramp Hours",
+            "default": 168
+          },
+          "rate_shock_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate Shock Start"
+          },
+          "equity_crash_pct": {
+            "type": "number",
+            "maximum": 0.0,
+            "minimum": -60.0,
+            "title": "Equity Crash Pct",
+            "default": 0.0
+          },
+          "equity_crash_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equity Crash Start"
+          },
+          "equity_crash_hours": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Equity Crash Hours",
+            "default": 240
+          }
+        },
+        "type": "object",
+        "title": "StressShockRequest"
+      },
+      "StressSimulationRequest": {
+        "properties": {
+          "aum0": {
+            "type": "number",
+            "minimum": 100000000.0,
+            "title": "Aum0",
+            "default": 3000000000.0
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "default": 42
+          },
+          "strategies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strategies",
+            "default": [
+              "aegisflow",
+              "baseline2_static"
+            ]
+          },
+          "shocks": {
+            "$ref": "#/components/schemas/StressShockRequest"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shocks"
+        ],
+        "title": "StressSimulationRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

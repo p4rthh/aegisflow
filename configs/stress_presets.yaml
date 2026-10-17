@@ -1,0 +1,52 @@
+# Preconfigured Stress Test Presets
+presets:
+  payday_squeeze:
+    description: "Intensified post-payday settlement wave (+50% withdrawals across bill-pay days)"
+    withdrawal_multiplier: 1.5
+    deposit_multiplier: 1.0
+    window:
+      start: "2026-06-01T00:00:00"
+      end: "2026-06-30T23:00:00"
+
+  holiday_rush:
+    description: "Peak holiday shopping and redemption drain"
+    withdrawal_multiplier: 1.6
+    deposit_multiplier: 1.1
+    window:
+      start: "2026-12-15T00:00:00"
+      end: "2026-12-31T23:00:00"
+
+  bank_run_12h:
+    description: "Sudden 12-hour acute run event peaking at 4.0x normal outflows"
+    run_event:
+      start: "2026-07-14T09:00:00"
+      duration_hours: 12
+      peak_multiplier: 4.0
+      decay: "exponential"
+
+  rate_shock_150bp:
+    description: "Sovereign yield spike of +150 bps ramped over 168 hours (erodes bond values)"
+    rate_shock_bps: 150.0
+    rate_shock_ramp_hours: 168
+    rate_shock_start: "2026-05-01T00:00:00"
+
+  equity_crash_30:
+    description: "Acute -30% equity index plunge over 10 days (240 hours)"
+    equity_crash_pct: -30.0
+    equity_crash_start: "2026-03-01T00:00:00"
+    equity_crash_hours: 240
+
+  perfect_storm:
+    description: "All stresses combined: rate spike, equity crash, withdrawal surge, and sudden run event"
+    withdrawal_multiplier: 1.4
+    rate_shock_bps: 150.0
+    rate_shock_ramp_hours: 168
+    rate_shock_start: "2026-05-01T00:00:00"
+    equity_crash_pct: -30.0
+    equity_crash_start: "2026-05-01T00:00:00"
+    equity_crash_hours: 168
+    run_event:
+      start: "2026-05-05T09:00:00"
+      duration_hours: 12
+      peak_multiplier: 4.0
+      decay: "exponential"

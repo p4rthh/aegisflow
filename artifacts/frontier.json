@@ -1,0 +1,74 @@
+[
+  {
+    "policy_name": "Cost-Optimal (No Cap)",
+    "risk_mode": "cost_optimal",
+    "epsilon": 0.005,
+    "overdraft_cap_usd": null,
+    "net_pnl": 61367358.87371194,
+    "net_apy_pct": 3.4262478758791683,
+    "overdraft_hours": 4140,
+    "peak_overdraft_usd": 79306511.70915309,
+    "overdraft_interest_usd": 457492.5044244388,
+    "haircuts_usd": 12132061.298775977
+  },
+  {
+    "policy_name": "Guarded ($50M Cap)",
+    "risk_mode": "guarded",
+    "epsilon": 0.005,
+    "overdraft_cap_usd": 50000000.0,
+    "net_pnl": 61219740.20525533,
+    "net_apy_pct": 3.4180060652729725,
+    "overdraft_hours": 2499,
+    "peak_overdraft_usd": 50000000.0,
+    "overdraft_interest_usd": 168412.7935570272,
+    "haircuts_usd": 12131365.168357866
+  },
+  {
+    "policy_name": "Guarded ($25M Cap)",
+    "risk_mode": "guarded",
+    "epsilon": 0.005,
+    "overdraft_cap_usd": 25000000.0,
+    "net_pnl": 60828984.633225024,
+    "net_apy_pct": 3.3961894925341656,
+    "overdraft_hours": 1692,
+    "peak_overdraft_usd": 25000000.0,
+    "overdraft_interest_usd": 107077.36908926854,
+    "haircuts_usd": 12268952.402997084
+  },
+  {
+    "policy_name": "Guarded ($10M Cap)",
+    "risk_mode": "guarded",
+    "epsilon": 0.005,
+    "overdraft_cap_usd": 10000000.0,
+    "net_pnl": 60089973.16382778,
+    "net_apy_pct": 3.3549291788471556,
+    "overdraft_hours": 287,
+    "peak_overdraft_usd": 10000000.0,
+    "overdraft_interest_usd": 20365.769232463266,
+    "haircuts_usd": 12691157.572458649
+  },
+  {
+    "policy_name": "Conservative (P99.5, Zero OD)",
+    "risk_mode": "conservative",
+    "epsilon": 0.005,
+    "overdraft_cap_usd": 0.0,
+    "net_pnl": 59768343.012970805,
+    "net_apy_pct": 3.336972000284849,
+    "overdraft_hours": 0,
+    "peak_overdraft_usd": 0.0,
+    "overdraft_interest_usd": 0.0,
+    "haircuts_usd": 12780723.472336344
+  },
+  {
+    "policy_name": "Ultra-Conservative (P99.9)",
+    "risk_mode": "conservative",
+    "epsilon": 0.001,
+    "overdraft_cap_usd": 0.0,
+    "net_pnl": 59768343.012970805,
+    "net_apy_pct": 3.336972000284849,
+    "overdraft_hours": 0,
+    "peak_overdraft_usd": 0.0,
+    "overdraft_interest_usd": 0.0,
+    "haircuts_usd": 12780723.472336344
+  }
+]

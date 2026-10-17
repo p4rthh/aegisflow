@@ -1,0 +1,34 @@
+# Default configuration for AegisFlow Engine
+aum0: 3000000000.0          # $3.0B initial capital
+seed: 42
+risk_mode: "cost_optimal"    # "cost_optimal" | "guarded" | "conservative"
+overdraft_cap: null         # null = unlimited in cost_optimal
+guarded_cap: 25000000.0     # $25.0M default overdraft cap in guarded mode
+epsilon: 0.005              # 0.5% tail risk probability
+safety_margin: 0.10         # 10% safety cushion on need-time calculation
+pool_days: 3                # Target days of operational net drain in liquid pool
+bond_burnin_days: 35        # Days before activating bond ladder purchases
+night_burnin_days: 14       # Days before activating empirical night gatekeeper
+night_prior_buffer: 50000000.0  # $50M conservative prior buffer during burn-in
+bond_momentum_veto_bps: 30.0    # +30 bp 7-day rate momentum purchase veto
+purchase_cost_bps: 0.0      # Frictionless purchases by default
+
+frictions:
+  tier1_early_redemption_haircut: 0.005  # 0.5%
+  tier2_bond_liquidation_haircut: 0.020  # 2.0%
+  tier3_stock_liquidation_haircut: 0.150 # 15.0%
+  emergency_overdraft_penalty_apr: 0.120 # 12.0% APR
+
+bond:
+  duration: 1.92
+  zscore_veto: 2.0
+
+equity:
+  w_cap: 0.15               # Max 15% equity allocation
+  w_base: 0.10              # Base target
+  sigma_target: 0.10        # Target volatility 10%
+  gate_vol_max: 0.30        # Realized vol upper bound 30%
+  dd_gate: -0.08            # Drawdown gate: max -8% from 90d high
+  breaker: 0.12             # Drawdown circuit breaker: -12% triggers 30-day freeze
+  freeze_days: 30           # 30-day buy freeze upon breaker trip
+  permanent_horizon_years: 2.5 # Minimum runway before permanent capital test passes

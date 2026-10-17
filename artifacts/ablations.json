@@ -1,0 +1,34 @@
+[
+  {
+    "variant": "AegisFlow (Full Engine)",
+    "net_pnl": 61367358.87371194,
+    "delta_vs_aegisflow": 0.0,
+    "haircuts_total": 12132061.298775977,
+    "overdraft_interest": 457492.5044244388,
+    "capital_efficiency_ratio": 0.7329053492261851
+  },
+  {
+    "variant": "AF - No Bond Ladder (Repo Only)",
+    "net_pnl": 45643969.70474535,
+    "delta_vs_aegisflow": -15723389.168966591,
+    "haircuts_total": 0.0,
+    "overdraft_interest": 434269.79423792084,
+    "capital_efficiency_ratio": 0.5451221980298716
+  },
+  {
+    "variant": "AF - Fixed Waterfall (Rank Order)",
+    "net_pnl": 43118193.41075051,
+    "delta_vs_aegisflow": -18249165.462961435,
+    "haircuts_total": 30169693.05234153,
+    "overdraft_interest": 0.0,
+    "capital_efficiency_ratio": 0.5149570582749246
+  },
+  {
+    "variant": "Baseline 2+ (Static with Cost Waterfall)",
+    "net_pnl": -156294746.34765303,
+    "delta_vs_aegisflow": -217662105.22136497,
+    "haircuts_total": 0.0,
+    "overdraft_interest": 24863402.795938868,
+    "capital_efficiency_ratio": -1.8666153759342305
+  }
+]
