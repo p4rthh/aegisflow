@@ -16,20 +16,25 @@ router = APIRouter(prefix="/backtest", tags=["Backtest & Alpha"])
 @router.get("/compare")
 def get_backtest_compare(
     aum0: float = Query(3_000_000_000.0, ge=1e8),
-    risk_mode: str = Query("cost_optimal"),
+    risk_mode: RiskMode = Query(RiskMode.COST_OPTIMAL),
     state: AppState = Depends(get_app_state),
 ):
     """Retrieve full 4-strategy comparative performance, KPIs, and equity curves."""
-    if not state.backtest_data:
-        # Generate dynamically if not cached
-        if state.df is not None:
-            cfg = state.config.model_copy(deep=True)
-            cfg.risk_mode = RiskMode(risk_mode)
-            cfg.aum0 = aum0
-            return run_comparative_backtest(state.df, aum0=aum0, config=cfg)
-        raise HTTPException(status_code=503, detail={"error": {"code": "NOT_READY", "message": "Backtest data not available"}})
+    if state.backtest_data:
+        cached_aum = state.backtest_data.get("config", {}).get("aum0")
+        cached_mode = state.backtest_data.get("config", {}).get("risk_mode")
+        if (cached_aum is None or abs(float(cached_aum) - aum0) < 1.0) and (
+            cached_mode is None or cached_mode == risk_mode.value
+        ):
+            return state.backtest_data
 
-    return state.backtest_data
+    # Generate dynamically if not cached or parameters differ
+    if state.df is not None:
+        cfg = state.config.model_copy(deep=True)
+        cfg.risk_mode = risk_mode
+        cfg.aum0 = aum0
+        return run_comparative_backtest(state.df, aum0=aum0, config=cfg, save_artifacts=False)
+    raise HTTPException(status_code=503, detail={"error": {"code": "NOT_READY", "message": "Backtest data not available"}})
 
 
 @router.get("/ablations")

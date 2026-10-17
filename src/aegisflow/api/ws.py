@@ -40,40 +40,51 @@ async def websocket_replay(websocket: WebSocket):
         try:
             while True:
                 msg_text = await websocket.receive_text()
-                cmd_data = json.loads(msg_text)
-                cmd = cmd_data.get("cmd")
+                try:
+                    cmd_data = json.loads(msg_text)
+                    if not isinstance(cmd_data, dict):
+                        continue
+                    cmd = cmd_data.get("cmd")
 
-                if cmd == "play":
-                    if "speed" in cmd_data:
-                        speed = max(1, min(2000, int(cmd_data["speed"])))
-                    if "from_index" in cmd_data:
-                        current_index = max(0, min(total_hours - 1, int(cmd_data["from_index"])))
-                    if "strategies" in cmd_data:
-                        strategies = cmd_data["strategies"]
-                    is_playing = True
+                    if cmd == "play":
+                        if "speed" in cmd_data:
+                            speed = max(1, min(2000, int(cmd_data["speed"])))
+                        if "from_index" in cmd_data:
+                            current_index = max(0, min(total_hours - 1, int(cmd_data["from_index"])))
+                        if "strategies" in cmd_data and isinstance(cmd_data["strategies"], list):
+                            strategies = cmd_data["strategies"]
+                        is_playing = True
 
-                elif cmd == "pause":
-                    is_playing = False
+                    elif cmd == "pause":
+                        is_playing = False
 
-                elif cmd == "seek":
-                    idx = int(cmd_data.get("index", 0))
-                    current_index = max(0, min(total_hours - 1, idx))
-                    # Emit instant preview tick upon seek
-                    tick = build_tick_payload(current_index, df, ticks_cache, strategies)
-                    await websocket.send_text(json.dumps({"type": "tick", "payload": tick}))
+                    elif cmd == "seek":
+                        idx = int(cmd_data.get("index", 0))
+                        current_index = max(0, min(total_hours - 1, idx))
+                        # Emit instant preview tick upon seek
+                        tick = build_tick_payload(current_index, df, ticks_cache, strategies)
+                        await websocket.send_text(json.dumps({"type": "tick", "payload": tick}))
 
-                elif cmd == "speed":
-                    speed = max(1, min(2000, int(cmd_data.get("value", 60))))
+                    elif cmd == "speed":
+                        speed = max(1, min(2000, int(cmd_data.get("value", 60))))
+                except (json.JSONDecodeError, ValueError, TypeError):
+                    # Ignore malformed frame without terminating listener
+                    continue
 
         except WebSocketDisconnect:
+            pass
+        except asyncio.CancelledError:
             pass
         except Exception:
             pass
 
-    asyncio.create_task(incoming_listener())
+    listener_task = asyncio.create_task(incoming_listener())
 
     try:
         while True:
+            if listener_task.done():
+                break
+
             if not is_playing:
                 await asyncio.sleep(0.05)
                 continue
@@ -111,3 +122,10 @@ async def websocket_replay(websocket: WebSocket):
         pass
     except Exception:
         pass
+    finally:
+        if not listener_task.done():
+            listener_task.cancel()
+            try:
+                await listener_task
+            except (asyncio.CancelledError, Exception):
+                pass

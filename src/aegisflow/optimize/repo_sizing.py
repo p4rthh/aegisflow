@@ -86,8 +86,10 @@ def calculate_sweep_sizing(
     # Rule B: Overdraft cost-optimal buffer via bisection
     b_rule_b = solve_rule_b_buffer(target_od_hours, cumulative_paths, peak_drains)
 
-    # Rule C: Tail risk guardrails
-    q_tail = quantiles.get("p995", float(np.percentile(peak_drains, 99.5)))
+    # Rule C: Tail risk guardrails derived dynamically from tolerance epsilon
+    tail_pct = (1.0 - epsilon) * 100.0
+    key = f"p{int(round(tail_pct * 10))}"
+    q_tail = quantiles.get(key, float(np.percentile(peak_drains, tail_pct)))
 
     if risk_mode == RiskMode.CONSERVATIVE:
         # Conservative: zero reliance on overdraft (K = 0, P99.5)

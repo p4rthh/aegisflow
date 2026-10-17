@@ -74,7 +74,7 @@ def apply_stress_shocks(df: pd.DataFrame, shocks: Dict[str, Any]) -> pd.DataFram
         ramp_hours = max(1, int(shocks.get("rate_shock_ramp_hours", 168)))
         rate_start_ts = pd.to_datetime(shocks.get("rate_shock_start", str(df_shocked["timestamp"].iloc[0])))
 
-        start_idx = int(df_shocked[ts_series >= rate_start_ts].index[0]) if (ts_series >= rate_start_ts).any() else 0
+        start_idx = int(df_shocked[ts_series >= rate_start_ts].index[0]) if (ts_series >= rate_start_ts).any() else n_hours
         end_idx = min(n_hours, start_idx + ramp_hours)
 
         # Build ramp multiplier
@@ -98,7 +98,7 @@ def apply_stress_shocks(df: pd.DataFrame, shocks: Dict[str, Any]) -> pd.DataFram
         crash_hours = max(1, int(shocks.get("equity_crash_hours", 240)))
         eq_start_ts = pd.to_datetime(shocks.get("equity_crash_start", str(df_shocked["timestamp"].iloc[0])))
 
-        start_idx = int(df_shocked[ts_series >= eq_start_ts].index[0]) if (ts_series >= eq_start_ts).any() else 0
+        start_idx = int(df_shocked[ts_series >= eq_start_ts].index[0]) if (ts_series >= eq_start_ts).any() else n_hours
         end_idx = min(n_hours, start_idx + crash_hours)
 
         crash_multiplier = np.ones(n_hours, dtype=np.float64)

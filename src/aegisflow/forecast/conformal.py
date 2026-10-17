@@ -36,7 +36,7 @@ class ConformalCalibrator:
             coverage_gap = self.target_coverage - empirical_coverage
             if coverage_gap > 0.0:
                 self.current_kappa = min(self.max_kappa, self.current_kappa + 0.05)
-            elif coverage_gap < -0.01:
+            elif len(self.history_covered) >= self.window and empirical_coverage >= 1.0:
                 self.current_kappa = max(self.min_kappa, self.current_kappa - 0.02)
 
         return self.current_kappa

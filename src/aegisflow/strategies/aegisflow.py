@@ -44,6 +44,13 @@ from aegisflow.optimize.repo_sizing import calculate_sweep_sizing
 from aegisflow.audit.decision_log import DecisionLogger
 from aegisflow.audit.narrative import generate_narrative
 
+# Empirical hourly night outflow profile (withdrawals - deposits) from 17:00 to 08:00
+DEFAULT_NIGHT_OUTFLOW_PROFILE = np.array([
+    2_295_932.0, 1_826_017.0, 1_631_152.0, 1_547_718.0, 1_414_693.0,
+    1_170_095.0,   796_854.0,   529_391.0,   146_943.0,  -172_905.0,
+   -513_031.0,  -693_749.0,  -933_015.0, -1_651_449.0, -1_740_345.0,
+], dtype=np.float64)
+
 
 class AegisFlow(BaseStrategy):
     """Institutional Treasury Engine with Dynamic Quantile Waterfall & Regime Awareness."""
@@ -70,12 +77,17 @@ class AegisFlow(BaseStrategy):
             burnin_days=self.config.bond_burnin_days,
         )
 
-        # Walk-forward forecast cache
+        # Walk-forward forecast cache & night path state
         self.preds_df: Optional[pd.DataFrame] = None
         self.d_hat: float = -289_000.0  # Initialized near long-term mean
         self.current_buffer: float = 10_000_000.0
         self.last_gatekeeper_result: Optional[GatekeeperResult] = None
         self.recent_night_actuals: List[float] = []
+        self.recent_night_residuals: List[float] = []
+        self.current_night_is_heavy: bool = False
+        self.current_night_mean_forecast: Optional[np.ndarray] = None
+        self.historical_night_outflows_heavy: List[np.ndarray] = []
+        self.historical_night_outflows_normal: List[np.ndarray] = []
 
     def init(self, df: pd.DataFrame, aum0: float, config: AppConfig) -> None:
         """Initialize models, precalculated forecasts, and historical state."""
@@ -218,13 +230,30 @@ class AegisFlow(BaseStrategy):
         if hour == REPO_SWEEP_HOUR:
             free_for_sweep = max(0.0, state.cash - state.overdraft)
 
-            # Retrieve mean forecast for the 15-hour overnight window (rows t to t+14)
-            if self.preds_df is not None and t + REPO_LOCK_HOURS <= len(self.preds_df):
-                mean_path_15 = self.preds_df["mean"].iloc[t : t + REPO_LOCK_HOURS].to_numpy()
-            else:
-                mean_path_15 = np.full(REPO_LOCK_HOURS, 1_000_000.0)
-
             is_heavy = bool(row["is_heavy_calendar"])
+            self.current_night_is_heavy = is_heavy
+
+            # Construct 15-hour expected outflow path strictly from past completed nights (rows <= t-1)
+            pool = self.historical_night_outflows_heavy if is_heavy else self.historical_night_outflows_normal
+            if len(pool) < 3:
+                pool = self.historical_night_outflows_heavy + self.historical_night_outflows_normal
+            if len(pool) >= 3:
+                mean_path_15 = np.mean(pool[-30:], axis=0)
+            else:
+                mean_path_15 = DEFAULT_NIGHT_OUTFLOW_PROFILE.copy()
+
+            # Anchor with today's 1-step causal forecast at 17:00 if available (row t strictly)
+            if self.preds_df is not None and t < len(self.preds_df):
+                t_mean = float(self.preds_df["mean"].iloc[t])
+                if t_mean > 0:
+                    init_diff = t_mean - mean_path_15[0]
+                    decay = np.exp(-np.arange(REPO_LOCK_HOURS) / 3.0)
+                    mean_path_15 = np.maximum(0.0, mean_path_15 + init_diff * decay)
+
+            self.current_night_mean_forecast = mean_path_15.copy()
+            self.recent_night_actuals = []
+            self.recent_night_residuals = []
+
             conformal_scale = self.conformal.current_kappa
             if OverlayState.STRESS_ELEVATED.value in self.overlays:
                 conformal_scale *= 1.5
@@ -393,17 +422,33 @@ class AegisFlow(BaseStrategy):
             q90 = float(self.preds_df["q90"].iloc[t])
             self.flow_regime.update(actual_outflow, q50, q90)
 
-        # Record overnight realization at 08:00
+        # Record overnight realization at 08:00 and track hourly residuals
         hour = int(row["hour"])
         if hour == REPO_MATURE_HOUR and self.last_gatekeeper_result is not None:
             if len(self.recent_night_actuals) == REPO_LOCK_HOURS:
                 realized_night_drain = float(np.max(-np.cumsum(self.recent_night_actuals)))
                 p995 = self.last_gatekeeper_result.night_drain_quantiles.get("p995", 50e6)
                 self.conformal.update(realized_night_drain, p995)
-                self.night_engine.update_history(
-                    np.array(self.recent_night_actuals),
-                    is_heavy=bool(row["is_heavy_calendar"]),
-                )
+
+                if len(self.recent_night_residuals) == REPO_LOCK_HOURS:
+                    self.night_engine.update_history(
+                        np.array(self.recent_night_residuals, dtype=np.float64),
+                        is_heavy=self.current_night_is_heavy,
+                    )
+
+                completed_outflows = -np.array(self.recent_night_actuals, dtype=np.float64)
+                if self.current_night_is_heavy:
+                    self.historical_night_outflows_heavy.append(completed_outflows)
+                else:
+                    self.historical_night_outflows_normal.append(completed_outflows)
+
             self.recent_night_actuals = []
+            self.recent_night_residuals = []
+            self.current_night_mean_forecast = None
         elif hour >= REPO_SWEEP_HOUR or hour < REPO_MATURE_HOUR:
             self.recent_night_actuals.append(net_flow)
+            if self.current_night_mean_forecast is not None and len(self.recent_night_residuals) < REPO_LOCK_HOURS:
+                k = len(self.recent_night_residuals)
+                expected_k = float(self.current_night_mean_forecast[k])
+                actual_outflow_k = -net_flow
+                self.recent_night_residuals.append(actual_outflow_k - expected_k)

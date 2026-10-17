@@ -51,9 +51,17 @@ def run_stress_test(
     baseline_json_path = Path("artifacts") / f"backtest_{int(aum0)}.json"
     unshocked_kpis = {}
     if baseline_json_path.exists():
-        with open(baseline_json_path, "r") as f:
-            unshocked_payload = json.load(f)
-            unshocked_kpis = unshocked_payload.get("strategies", {})
+        try:
+            with open(baseline_json_path, "r") as f:
+                unshocked_payload = json.load(f)
+                cached_cfg = unshocked_payload.get("config", {})
+                if (
+                    cached_cfg.get("risk_mode") == config.risk_mode.value
+                    and cached_cfg.get("seed") == config.seed
+                ):
+                    unshocked_kpis = unshocked_payload.get("strategies", {})
+        except Exception:
+            unshocked_kpis = {}
 
     results: Dict[str, Any] = {}
     curves: Dict[str, List[float]] = {}
@@ -76,10 +84,16 @@ def run_stress_test(
         kpis = sim_res.metrics
 
         # Calculate delta vs unshocked
-        unshocked_pnl = unshocked_kpis.get(sid, {}).get("net_pnl", kpis["net_pnl"])
-        unshocked_hc = unshocked_kpis.get(sid, {}).get("haircuts", {}).get("total", kpis["haircuts"]["total"])
-        unshocked_od_int = unshocked_kpis.get(sid, {}).get("overdraft", {}).get("interest_usd", kpis["overdraft"]["interest_usd"])
-        unshocked_peak_od = unshocked_kpis.get(sid, {}).get("overdraft", {}).get("peak_usd", kpis["overdraft"]["peak_usd"])
+        unshocked_strat = unshocked_kpis.get(sid)
+        if not unshocked_strat:
+            unshocked_sim = run_simulation(strat_map[sid](), df, aum0=aum0, config=config)
+            unshocked_strat = unshocked_sim.metrics
+            unshocked_kpis[sid] = unshocked_strat
+
+        unshocked_pnl = unshocked_strat.get("net_pnl", kpis["net_pnl"])
+        unshocked_hc = unshocked_strat.get("haircuts", {}).get("total", kpis["haircuts"]["total"])
+        unshocked_od_int = unshocked_strat.get("overdraft", {}).get("interest_usd", kpis["overdraft"]["interest_usd"])
+        unshocked_peak_od = unshocked_strat.get("overdraft", {}).get("peak_usd", kpis["overdraft"]["peak_usd"])
 
         delta = {
             "net_pnl": float(kpis["net_pnl"] - unshocked_pnl),

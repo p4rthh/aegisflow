@@ -3,6 +3,7 @@
 See PROJECT_ROADMAP.md §2.1 & Task 5.
 """
 
+import hashlib
 from pathlib import Path
 from typing import Dict, Any, Tuple
 import numpy as np
@@ -10,6 +11,27 @@ import pandas as pd
 
 from aegisflow.data.features import build_feature_dataframe
 from aegisflow.forecast.hourly_model import HourlyQuantileModel, pinball_loss
+
+
+def get_walkforward_cache_path(
+    cache_path: str | Path,
+    df: pd.DataFrame,
+    burnin_days: int,
+    retrain_freq_hours: int,
+) -> Path:
+    """Compute parameter-fingerprinted cache path to prevent collisions."""
+    cache_file = Path(cache_path)
+    n_rows = len(df)
+    t0 = str(df["timestamp"].iloc[0]) if "timestamp" in df and len(df) > 0 else "0"
+    t1 = str(df["timestamp"].iloc[-1]) if "timestamp" in df and len(df) > 0 else str(n_rows)
+    sig = f"{n_rows}_{t0}_{t1}_{burnin_days}_{retrain_freq_hours}"
+    h = hashlib.sha256(sig.encode("utf-8")).hexdigest()[:8]
+
+    if cache_file.name == "hourly_preds.parquet":
+        if n_rows == 8760 and burnin_days == 21 and retrain_freq_hours == 168 and cache_file.exists():
+            return cache_file
+        return cache_file.parent / f"hourly_preds_{h}.parquet"
+    return cache_file
 
 
 def run_walkforward_forecast(
@@ -22,7 +44,7 @@ def run_walkforward_forecast(
     
     Returns (predictions_df, performance_report).
     """
-    cache_file = Path(cache_path)
+    cache_file = get_walkforward_cache_path(cache_path, df, burnin_days, retrain_freq_hours)
     if cache_file.exists():
         preds_df = pd.read_parquet(cache_file)
         return preds_df, {}
