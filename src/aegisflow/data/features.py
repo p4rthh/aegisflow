@@ -31,6 +31,14 @@ FEATURE_NAMES: List[str] = [
     "roll_mean_168h", "roll_std_168h",
     "ewma_outflow_6h",
     "flow_zscore_6h",
+    # Component deposit & withdrawal flows (strictly lagged <= t-1)
+    "lag_dep_1", "lag_dep_24",
+    "lag_with_1", "lag_with_24",
+    "roll_mean_dep_24h", "roll_mean_with_24h",
+    # Flow velocity, acceleration, and seasonal differences
+    "flow_diff_1", "flow_accel", "flow_diff_24", "flow_diff_168",
+    "dep_with_ratio_24h",
+    "ewma_outflow_24h",
 ]
 
 
@@ -108,5 +116,32 @@ def build_feature_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     valid_mask = std6 > 1e-4
     z6[valid_mask] = (lag1.values[valid_mask] - mean6[valid_mask]) / std6[valid_mask]
     feats["flow_zscore_6h"] = np.clip(z6, -5.0, 5.0)
+
+    # 5. Component deposit & withdrawal flows (strictly lagged <= t-1)
+    dep_series = df["deposits_usd"] if "deposits_usd" in df else pd.Series(0.0, index=df.index)
+    withd_series = df["withdrawals_usd"] if "withdrawals_usd" in df else pd.Series(0.0, index=df.index)
+
+    lag_dep_1 = dep_series.shift(1).bfill()
+    lag_dep_24 = dep_series.shift(24).bfill()
+    lag_with_1 = withd_series.shift(1).bfill()
+    lag_with_24 = withd_series.shift(24).bfill()
+
+    feats["lag_dep_1"] = lag_dep_1
+    feats["lag_dep_24"] = lag_dep_24
+    feats["lag_with_1"] = lag_with_1
+    feats["lag_with_24"] = lag_with_24
+
+    feats["roll_mean_dep_24h"] = lag_dep_1.rolling(24, min_periods=1).mean()
+    feats["roll_mean_with_24h"] = lag_with_1.rolling(24, min_periods=1).mean()
+
+    # 6. Flow velocity, acceleration, and seasonal differences
+    feats["flow_diff_1"] = feats["lag_1"] - feats["lag_2"]
+    feats["flow_accel"] = (feats["lag_1"] - feats["lag_2"]) - (feats["lag_2"] - feats["lag_3"])
+    feats["flow_diff_24"] = feats["lag_1"] - feats["lag_24"]
+    feats["flow_diff_168"] = feats["lag_1"] - feats["lag_168"]
+
+    dep_with_ratio = feats["roll_mean_dep_24h"] / (feats["roll_mean_with_24h"] + 1e-5)
+    feats["dep_with_ratio_24h"] = np.clip(dep_with_ratio, 0.1, 10.0)
+    feats["ewma_outflow_24h"] = lag1.ewm(span=24, min_periods=1).mean()
 
     return feats[FEATURE_NAMES]

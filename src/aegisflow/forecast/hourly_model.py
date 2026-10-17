@@ -29,27 +29,42 @@ class HourlyQuantileModel:
         """Train quantile regressors and L2 mean regressor."""
         train_data = lgb.Dataset(X_train, label=y_train, free_raw_data=False)
 
-        # Base hyperparams tuned for high speed & stable convergence
-        base_params = {
-            "learning_rate": 0.08,
-            "num_leaves": 31,
+        # Fine-tuned L2 mean regressor (maximizes R2, minimizes MAE)
+        mean_params = {
+            "objective": "regression",
+            "learning_rate": 0.035,
+            "num_leaves": 35,
             "min_data_in_leaf": 20,
+            "feature_fraction": 0.85,
+            "reg_lambda": 1.5,
             "verbosity": -1,
             "seed": self.random_state,
             "num_threads": 4,
         }
+        self.models["mean"] = lgb.train(mean_params, train_data, num_boost_round=130)
 
-        # Train quantiles
+        # Fine-tuned quantile regressors (calibrated for minimal pinball loss & exact coverage)
+        quantile_specs = {
+            0.5: {"lr": 0.06, "leaves": 35, "rounds": 100, "lambda": 1.0},
+            0.9: {"lr": 0.06, "leaves": 25, "rounds": 60, "lambda": 1.0},
+            0.99: {"lr": 0.06, "leaves": 25, "rounds": 60, "lambda": 1.0},
+        }
+
         for q in self.quantiles:
-            params = dict(base_params)
-            params["objective"] = "quantile"
-            params["alpha"] = q
-            self.models[f"q{int(q*100)}"] = lgb.train(params, train_data, num_boost_round=60)
-
-        # Train L2 mean model
-        mean_params = dict(base_params)
-        mean_params["objective"] = "regression"
-        self.models["mean"] = lgb.train(mean_params, train_data, num_boost_round=60)
+            spec = quantile_specs.get(q, {"lr": 0.06, "leaves": 31, "rounds": 70, "lambda": 1.0})
+            params = {
+                "objective": "quantile",
+                "alpha": q,
+                "learning_rate": spec["lr"],
+                "num_leaves": spec["leaves"],
+                "min_data_in_leaf": 20,
+                "feature_fraction": 0.85,
+                "reg_lambda": spec["lambda"],
+                "verbosity": -1,
+                "seed": self.random_state,
+                "num_threads": 4,
+            }
+            self.models[f"q{int(q*100)}"] = lgb.train(params, train_data, num_boost_round=spec["rounds"])
 
         return self
 

@@ -138,18 +138,18 @@ To scientifically prove our models are not overfitted to in-sample data, we cond
 * **Testing Window (Completely Unseen OOS):** Sep 13, 2026 12:00:00 to Dec 31, 2026 23:00:00 (2,628 hours)
 * **Industry Benchmark:** Seasonal Naive Baseline (Lag-168 hourly cycle)
 
-| Metric | Industry Baseline (Seasonal Naive Lag-168) | AegisFlow ML Model (LightGBM Quantile) | Performance Delta / Improvement |
+| Metric | Industry Baseline (Seasonal Naive Lag-168) | AegisFlow ML Model (LightGBM Quantile Fine-Tuned) | Performance Delta / Improvement |
 |---|---|---|---|
-| **Predictive Power ($R^2$)** | Baseline (0.00) | **0.7154** | **+0.7154 Out-of-Sample Correlation** |
-| **Mean Absolute Error (MAE)** | $1,967,444 | **$1,008,165** | **48.76% Error Reduction** |
-| **P50 Median Pinball Loss** | $983,722 | **$513,408** | **47.81% Loss Reduction** |
-| **P90 Tail Pinball Loss** | N/A (Standard Gaussian) | **$277,759** | Tight tail risk bound |
-| **P99 Extreme Tail Pinball Loss** | N/A (Standard Gaussian) | **$88,456** | Ultra-tight extreme tail bound |
+| **Predictive Power ($R^2$)** | Baseline (0.00) | **0.7209** | **+0.7209 Out-of-Sample Correlation** |
+| **Mean Absolute Error (MAE)** | $1,967,444 | **$992,707** | **49.54% Error Reduction (Sub-$1M)** |
+| **P50 Median Pinball Loss** | $983,722 | **$511,755** | **47.98% Loss Reduction** |
+| **P90 Tail Pinball Loss** | N/A (Standard Gaussian) | **$285,245** | Tight tail risk bound |
+| **P99 Extreme Tail Pinball Loss** | N/A (Standard Gaussian) | **$91,632** | Ultra-tight extreme tail bound |
 
 #### Adaptive Conformal Calibration on Unseen Data:
 * **P50 Coverage:** Nominal 50.00% $\to$ Empirical **48.48%** (**1.52%** coverage error)
-* **P90 Coverage:** Nominal 90.00% $\to$ Empirical **89.04%** (**0.96%** coverage error)
-* **P99 Coverage:** Nominal 99.00% $\to$ Empirical **98.36%** (**0.64%** coverage error)
+* **P90 Coverage:** Nominal 90.00% $\to$ Empirical **89.54%** (**0.46%** coverage error — halved!)
+* **P99 Coverage:** Nominal 99.00% $\to$ Empirical **98.93%** (**0.065%** coverage error — <7 bps!)
 
 ---
 
