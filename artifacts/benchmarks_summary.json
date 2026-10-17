@@ -1,0 +1,38 @@
+{
+  "out_of_sample_split_70_30": {
+    "train_hours": 6132,
+    "test_hours": 2628,
+    "train_period": "2026-01-01 00:00:00 to 2026-09-13 11:00:00",
+    "test_period": "2026-09-13 12:00:00 to 2026-12-31 23:00:00",
+    "r2_score": 0.7153984013898624,
+    "mae_model_usd": 1008165.2920125197,
+    "mae_naive_usd": 1967443.625,
+    "mae_improvement_pct": 48.75760203738902,
+    "pinball_loss_q50": 513408.22602734517,
+    "pinball_loss_naive_q50": 983721.8125,
+    "pinball_reduction_pct": 47.809612483575464,
+    "pinball_loss_q90": 277758.9543315615,
+    "pinball_loss_q99": 88455.74394763996,
+    "empirical_coverage_q50": 0.484779299847793,
+    "empirical_coverage_q90": 0.8904109589041096,
+    "empirical_coverage_q99": 0.9836377473363774,
+    "coverage_error_q50": 0.015220700152207,
+    "coverage_error_q90": 0.009589041095890427,
+    "coverage_error_q99": 0.0063622526636225585
+  },
+  "monte_carlo_chaos_benchmark": {
+    "n_trials": 20,
+    "mean_af_pnl": -1487644118.1784356,
+    "min_af_pnl": -2337953159.2201767,
+    "max_af_pnl": -536932682.0092812,
+    "mean_b2_pnl": -1776481295.0603497,
+    "mean_alpha_vs_b2": 288837176.8819143,
+    "min_alpha_vs_b2": 200929078.9403,
+    "win_rate_vs_b2": 100.0,
+    "mean_af_haircuts": 0.0,
+    "mean_b2_haircuts": 88063878.81431893,
+    "haircut_reduction_pct": 100.0,
+    "mean_af_od_hours": 7961.8,
+    "mean_b2_od_hours": 7848.7
+  }
+}
