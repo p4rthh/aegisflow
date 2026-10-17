@@ -58,10 +58,18 @@ static_dir = Path(__file__).resolve().parent / "static"
 static_dir.mkdir(parents=True, exist_ok=True)
 
 @app.get("/", include_in_schema=False)
-def get_dashboard():
+def get_landing_page():
     index_file = static_dir / "index.html"
     if index_file.exists():
         return FileResponse(index_file)
-    return {"status": "ok", "message": "AegisFlow API is running. Mount static dashboard to view UI."}
+    return {"status": "ok", "message": "AegisFlow API is running. Intro page not yet generated."}
+
+@app.get("/terminal", include_in_schema=False)
+@app.get("/simulation", include_in_schema=False)
+def get_simulation_terminal():
+    term_file = static_dir / "terminal.html"
+    if term_file.exists():
+        return FileResponse(term_file)
+    return {"status": "ok", "message": "Simulation dashboard not yet generated."}
 
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
