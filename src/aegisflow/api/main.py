@@ -41,6 +41,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 # Mount API Routers under /api
 app.include_router(meta_router, prefix="/api")
 app.include_router(stream_router, prefix="/api")
@@ -48,3 +52,16 @@ app.include_router(backtest_router, prefix="/api")
 app.include_router(stress_router, prefix="/api")
 app.include_router(logs_router, prefix="/api")
 app.include_router(ws_router)
+
+# Mount static files and dashboard entrypoint
+static_dir = Path(__file__).resolve().parent / "static"
+static_dir.mkdir(parents=True, exist_ok=True)
+
+@app.get("/", include_in_schema=False)
+def get_dashboard():
+    index_file = static_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    return {"status": "ok", "message": "AegisFlow API is running. Mount static dashboard to view UI."}
+
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")

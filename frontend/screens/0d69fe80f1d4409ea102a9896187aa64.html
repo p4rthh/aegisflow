@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+
+<html lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AegisFlow | Autonomous Liquidity &amp; Algorithmic Treasury Engine</title>
+<!-- Typography & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600;700&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Chart.js for Quantitative Visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            canvas: '#B5C4D6',
+            canvasDarker: '#AAB8CA',
+            // Warm Architectural Beige Surfaces (Zero stark white)
+            beige: {
+              50: '#FAF7F2',
+              100: '#F4EFE6',
+              200: '#EFE8DC',
+              300: '#E7DEC9',
+              400: '#DDD2B8',
+              surface: '#F4EFE6',
+              inset: '#ECE3D4',
+              sunken: '#E4DAC8',
+              card: '#F6F1E8'
+            },
+            featured: '#20334D',
+            featuredDeep: '#18273B',
+            primaryNavy: '#17273C',
+            secondarySlate: '#51647B',
+            hairline: 'rgba(23, 39, 60, 0.14)',
+            // Curated bespoke quantitative palette
+            quant: {
+              prussian: '#1E3A5F',
+              cobalt: '#204E78',
+              terracotta: '#A8543E',
+              copper: '#B2583F',
+              ochre: '#B8860B',
+              brass: '#C2962C',
+              sage: '#447C6F',
+              sageDeep: '#34665B',
+              plum: '#8C4855',
+              violet: '#635B88',
+              slate: '#546B8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Commissioner', 'sans-serif'],
+            heading: ['Manrope', 'sans-serif'],
+            mono: ['IBM Plex Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Swiss Modernist Architectural Rigor with Warm Beige Surfaces */
+    body {
+      background-color: #B5C4D6;
+      color: #17273C;
+      font-family: 'Commissioner', sans-serif;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    .font-mono {
+      font-family: 'IBM Plex Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .font-heading {
+      font-family: 'Manrope', sans-serif;
+      letter-spacing: -0.025em;
+    }
+
+    .terminal-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .terminal-scrollbar::-webkit-scrollbar-track {
+      background: #ECE3D4;
+    }
+    .terminal-scrollbar::-webkit-scrollbar-thumb {
+      background: #51647B;
+      border-radius: 1px;
+    }
+    .terminal-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #17273C;
+    }
+
+    /* Tactile Beige Hardware Buttons */
+    .tactile-btn {
+      background: #F4EFE6;
+      border: 1px solid rgba(23, 39, 60, 0.18);
+      transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tactile-btn:hover {
+      background: #EFE8DC;
+      border-color: rgba(23, 39, 60, 0.38);
+    }
+    .tactile-btn:active {
+      transform: translateY(1px);
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .status-pulse {
+      animation: pulse-dot 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+<style>/* Enforce clean open-counter numerals with tabular-nums as in reference */ .tabular-nums, .font-mono, #dailyInflow, #dailyOutflow, #tier0Balance, #tier1Balance, #tier2Balance, #tier3Balance, #kpiTotalAum, #kpiNetYield, #kpiNetFlow { font-feature-settings: 'tnum' 1, 'ss01' 1, 'zero' 0; letter-spacing: -0.01em; }</style></head>
+<body class="min-h-screen flex flex-col font-sans text-primaryNavy selection:bg-quant-cobalt selection:text-white">
+<!-- TOP COMMAND BAR / INSTITUTIONAL HEADER -->
+<header class="bg-beige-surface border-b border-primaryNavy/20 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-50 shadow-sm">
+<div class="flex items-center space-x-3.5">
+<div class="w-8 h-8 rounded bg-primaryNavy border border-primaryNavy/40 flex items-center justify-center text-beige-100 font-mono font-bold text-xs tracking-wider shadow-inner">
+      AF
+    </div>
+<div>
+<div class="flex items-center space-x-2.5">
+<span class="font-heading font-extrabold text-base tracking-tight text-primaryNavy">AEGIS<span class="text-quant-sageDeep">FLOW</span></span>
+<span class="text-[11px] text-secondarySlate font-mono tracking-tight font-medium">v4.18.2-QUANT</span>
+<span class="bg-beige-inset text-primaryNavy text-[10px] px-2 py-0.5 rounded-sm border border-primaryNavy/20 font-mono tracking-wide font-semibold">PROD-NY4</span>
+</div>
+<p class="text-[11.5px] text-secondarySlate font-sans font-medium tracking-tight mt-0.5">Autonomous liquidity &amp; algorithmic treasury engine</p>
+</div>
+</div>
+<!-- Real-Time Telemetry Node -->
+<div class="flex items-center space-x-3 bg-beige-inset px-3 py-1.5 rounded-sm border border-primaryNavy/20 text-xs font-mono">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-quant-sage status-pulse"></span>
+<span class="text-secondarySlate text-[11px] font-sans font-medium">Autopilot:</span>
+<span class="text-primaryNavy font-semibold text-[11px]">ACTIVE</span>
+</div>
+<div class="h-3 w-[1px] bg-primaryNavy/20"></div>
+<div class="text-secondarySlate text-[11px] flex items-center gap-1.5">
+<i class="fa-regular fa-clock text-secondarySlate text-[10px]"></i>
+<span class="font-sans text-secondarySlate font-medium">Sim Tick:</span>
+<strong class="text-primaryNavy tabular-nums font-semibold" id="currentTickLabel">2026-11-14 16:00:00</strong>
+<span class="text-[10px] bg-beige-surface text-primaryNavy px-1.5 py-0.5 rounded-sm border border-primaryNavy/20 font-semibold" id="currentDayOfWeek">SATURDAY</span>
+</div>
+</div>
+<!-- Workstation Execution Controls -->
+<div class="flex items-center space-x-2">
+<div class="flex bg-beige-inset p-0.5 rounded-sm border border-primaryNavy/20 text-xs font-mono">
+<button class="px-2.5 py-1 rounded-sm bg-beige-surface hover:bg-beige-200 text-primaryNavy font-semibold transition flex items-center gap-1.5 text-xs border border-primaryNavy/15" id="btnPlayPause" onclick="togglePlay()">
+<i class="fa-solid fa-play text-[9px] text-primaryNavy" id="playIcon"></i>
+<span class="tracking-wide" id="playText">PLAY</span>
+</button>
+<button class="px-2 py-1 rounded-sm hover:bg-beige-surface text-primaryNavy speed-btn active font-semibold" data-speed="1" onclick="setSpeed(1)">1x</button>
+<button class="px-2 py-1 rounded-sm hover:bg-beige-surface text-secondarySlate speed-btn font-medium" data-speed="5" onclick="setSpeed(5)">5x</button>
+<button class="px-2 py-1 rounded-sm hover:bg-beige-surface text-secondarySlate speed-btn font-medium" data-speed="24" onclick="setSpeed(24)">24x</button>
+</div>
+<button class="bg-beige-surface hover:bg-beige-inset text-primaryNavy border border-primaryNavy/20 px-2.5 py-1.5 rounded-sm text-xs font-mono transition flex items-center gap-1 font-semibold" onclick="stepForward()" title="Step 1 Hour Forward">
+<i class="fa-solid fa-forward-step text-[10px] text-secondarySlate"></i>
+<span class="">STEP</span>
+</button>
+<button class="bg-beige-surface hover:bg-beige-inset text-secondarySlate hover:text-primaryNavy border border-primaryNavy/20 p-1.5 rounded-sm text-xs transition" onclick="resetSimulation()" title="Reset Simulation">
+<i class="fa-solid fa-rotate-left text-[11px]"></i>
+</button>
+</div>
+</header>
+<!-- EXECUTIVE KPI ARCHITECTURAL RIBBON -->
+<section class="bg-beige-surface border-b border-primaryNavy/20 px-4 py-2">
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-y lg:divide-y-0 lg:divide-x divide-primaryNavy/15">
+<!-- KPI 1: NAV -->
+<div class="py-1 px-3 first:pl-0">
+<div class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate flex items-center justify-between font-semibold">
+<span class="">Treasury NAV</span>
+<i class="fa-solid fa-vault text-[10px] text-secondarySlate/70"></i>
+</div>
+<div class="text-base lg:text-lg font-extrabold font-mono text-primaryNavy tabular-nums mt-0.5" id="kpiTotalAum">$139,273,226</div>
+<div class="text-[11px] font-sans text-secondarySlate flex items-center gap-1 mt-0.5">
+<span class="font-mono text-quant-sageDeep font-bold" id="kpiAlphaGain">+$14.24M</span>
+<span class="text-secondarySlate/90 text-[10.5px]">vs cash base</span>
+</div>
+</div>
+<!-- KPI 2: Net Realized Yield -->
+<div class="py-1 px-3">
+<div class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate flex items-center justify-between font-semibold">
+<span class="">Net Realized Yield</span>
+<i class="fa-solid fa-arrow-trend-up text-[10px] text-quant-sageDeep"></i>
+</div>
+<div class="text-base lg:text-lg font-extrabold font-mono text-quant-sageDeep tabular-nums mt-0.5" id="kpiNetYield">+$6,420,110</div>
+<div class="text-[11px] font-sans text-secondarySlate flex items-center gap-1 mt-0.5">
+<span class="text-primaryNavy font-mono font-bold" id="kpiNetApy">4.42%</span>
+<span class="text-secondarySlate/90 text-[10.5px]">effective APY</span>
+</div>
+</div>
+<!-- KPI 3: Hourly Net Velocity -->
+<div class="py-1 px-3">
+<div class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate flex items-center justify-between font-semibold">
+<span class="">Hourly Velocity</span>
+<i class="fa-solid fa-arrows-split-up-and-left text-[10px] text-secondarySlate/70"></i>
+</div>
+<div class="text-base lg:text-lg font-bold font-mono tabular-nums mt-0.5 text-quant-copper" id="kpiNetFlow">$-5,363,387</div>
+<div class="text-[10.5px] text-secondarySlate font-sans flex items-center justify-between mt-0.5">
+<span class="">In: <strong class="font-mono font-medium text-primaryNavy" id="kpiDepositHourly">$11.02M</strong></span>
+<span class="">Out: <strong class="font-mono font-medium text-quant-copper" id="kpiWithdrawalHourly">$16.38M</strong></span>
+</div>
+</div>
+<!-- KPI 4: Liquidation Haircuts -->
+<div class="py-1 px-3">
+<div class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate flex items-center justify-between font-semibold">
+<span class="">Liquidation Haircuts</span>
+<span class="w-1.5 h-1.5 rounded-full bg-quant-sageDeep"></span>
+</div>
+<div class="text-base lg:text-lg font-bold font-mono tabular-nums mt-0.5 text-quant-sageDeep" id="kpiHaircutsPaid">$0</div>
+<div class="text-[11px] font-sans text-secondarySlate flex items-center gap-1 mt-0.5">
+<span class="text-primaryNavy font-mono font-bold" id="kpiOverdraftIncidents">0 Breaches</span>
+<span class="text-secondarySlate/90 text-[10.5px]">100% guarantee</span>
+</div>
+</div>
+<!-- KPI 5: Repo Window -->
+<div class="py-1 px-3">
+<div class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate flex items-center justify-between font-semibold">
+<span class="">Repo Window</span>
+<i class="fa-solid fa-clock-rotate-left text-[10px] text-quant-brass" id="kpiRepoLockIcon"></i>
+</div>
+<div class="text-base font-extrabold font-mono text-quant-brass tabular-nums mt-0.5" id="kpiRepoStatus">17:00 CUTOFF</div>
+<div class="text-[10.5px] font-sans text-secondarySlate flex items-center justify-between mt-0.5" id="kpiRepoCountdown">
+<span class="">Lock: <strong class="text-primaryNavy font-medium">Active</strong></span>
+<span class="font-mono font-medium">Matures in 16h</span>
+</div>
+</div>
+<!-- KPI 6: Risk Regime -->
+<div class="py-1 px-3 last:pr-0">
+<div class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate flex items-center justify-between font-semibold">
+<span class="">Risk Regime</span>
+<i class="fa-solid fa-shield-halved text-[10px] text-secondarySlate/70"></i>
+</div>
+<div class="text-base font-extrabold font-mono text-primaryNavy tabular-nums mt-0.5 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-quant-slate"></span>
+<span class="text-xs font-bold" id="kpiMarketRegime">NORMAL DURATION</span>
+</div>
+<div class="text-[10.5px] text-secondarySlate font-sans flex items-center justify-between mt-0.5">
+<span class="">S&amp;P: <strong class="font-mono text-primaryNavy font-semibold" id="kpiStockIndex">$4,865.04</strong></span>
+<span class="">Vol: <strong class="font-mono text-primaryNavy font-semibold">18.0%</strong></span>
+</div>
+</div>
+</div>
+</section>
+<!-- MAIN QUANTITATIVE TERMINAL BODY -->
+<main class="flex-1 p-3 md:p-4 space-y-4 max-w-[1920px] mx-auto w-full">
+<!-- SECTION 1: 4-TIER HORIZONTAL LIQUIDITY WATERFALL BOARD -->
+<div class="border border-primaryNavy/20 rounded-md bg-beige-surface shadow-sm overflow-hidden">
+<div class="bg-beige-inset border-b border-primaryNavy/20 px-4 py-2.5 flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<span class="font-heading font-extrabold text-xs uppercase tracking-wider text-primaryNavy">Liquidity Waterfall Architecture</span>
+<span class="text-[11px] font-mono text-secondarySlate font-medium">Sequential Settlement Matrix</span>
+</div>
+<div class="text-[11px] font-mono text-secondarySlate">Total Deployed: <strong class="text-primaryNavy font-bold">$144.64M</strong></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-primaryNavy/15">
+<!-- TIER 0: Operational Cash Buffer -->
+<div class="p-4 flex flex-col justify-between space-y-3 bg-beige-surface">
+<div>
+<div class="flex items-center justify-between text-[11px] font-mono pb-1.5 border-b border-primaryNavy/10">
+<span class="font-bold text-quant-cobalt tracking-wide">TIER 0 · CASH</span>
+<span class="text-secondarySlate font-medium">0.0% APY</span>
+</div>
+<div class="mt-2.5">
+<span class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate block font-semibold">Unencumbered Cash Buffer</span>
+<div class="text-2xl font-bold font-mono text-primaryNavy tabular-nums tracking-tight mt-0.5" id="tier0Balance">$7,723,426</div>
+</div>
+<!-- Gauge & Tail Target -->
+<div class="mt-3 bg-beige-inset p-3 rounded border border-primaryNavy/15 space-y-1.5">
+<div class="flex justify-between text-[11px] font-mono">
+<span class="text-secondarySlate">P99 Target:</span>
+<span class="text-primaryNavy font-bold" id="tier0Target">$16,341,845</span>
+</div>
+<div class="w-full bg-primaryNavy/15 rounded-full h-1.5 overflow-hidden">
+<div class="bg-quant-cobalt h-1.5 rounded-full transition-all duration-300" id="tier0GaugeBar" style="width: 47%;"></div>
+</div>
+<div class="flex justify-between items-center text-[10.5px] font-mono pt-0.5">
+<span class="text-secondarySlate">Coverage: <strong class="text-primaryNavy font-bold" id="tier0Ratio">47%</strong></span>
+<span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-quant-terracotta/20 text-quant-terracotta border border-quant-terracotta/30 uppercase" id="tier0StatusPill">DEFICIT WARNING</span>
+</div>
+</div>
+</div>
+<div class="pt-2 border-t border-primaryNavy/10 flex items-center justify-between text-[10.5px] font-mono text-secondarySlate">
+<span class="text-quant-sageDeep font-bold" id="tier0DeficitStatus"><i class="fa-solid fa-shield-halved text-[9px] mr-1"></i>Zero deficit risk</span>
+<span class="font-medium">Friction: 0.00%</span>
+</div>
+</div>
+<!-- TIER 1: Overnight Repo Facility -->
+<div class="p-4 flex flex-col justify-between space-y-3 bg-beige-surface">
+<div>
+<div class="flex items-center justify-between text-[11px] font-mono pb-1.5 border-b border-primaryNavy/10">
+<span class="font-bold text-quant-brass tracking-wide">TIER 1 · REPO</span>
+<span class="text-primaryNavy font-bold" id="tier1Rate">4.26% APY</span>
+</div>
+<div class="mt-2.5">
+<span class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate block font-semibold">Swept Collateralized Vault</span>
+<div class="text-2xl font-bold font-mono text-primaryNavy tabular-nums tracking-tight mt-0.5" id="tier1Balance">$45,000,000</div>
+</div>
+<!-- Window State & Countdown -->
+<div class="mt-3 bg-beige-inset p-3 rounded border border-primaryNavy/15 space-y-1.5">
+<div class="flex items-center justify-between text-[10.5px] font-mono text-secondarySlate" id="tier1StateBadge">
+<span class="flex items-center gap-1 font-bold text-primaryNavy" id="tier1BadgeText"><i class="fa-solid fa-lock text-[9px] text-quant-brass mr-1"></i> Locked until 08:00</span>
+<span class="text-quant-brass font-bold" id="tier1RemainingHours">16h left</span>
+</div>
+<div class="w-full bg-primaryNavy/15 rounded-full h-1.5 overflow-hidden">
+<div class="bg-quant-brass h-1.5 rounded-full transition-all duration-300" id="tier1Progress" style="width: 0%;"></div>
+</div>
+<div class="flex justify-between text-[10.5px] font-mono text-secondarySlate">
+<span class="">Early Break: <strong class="text-primaryNavy font-semibold">0.50% ($225k)</strong></span>
+<span class="">Sweep @ 17:00</span>
+</div>
+</div>
+</div>
+<div class="pt-2 border-t border-primaryNavy/10 flex items-center justify-between text-[10.5px] font-mono text-secondarySlate">
+<span class="font-medium">Fed Repo Window</span>
+<span class="text-quant-sageDeep font-bold">Yield: +$5,289/day</span>
+</div>
+</div>
+<!-- TIER 2: 2Y Sovereign Treasury Bonds -->
+<div class="p-4 flex flex-col justify-between space-y-3 bg-beige-surface">
+<div>
+<div class="flex items-center justify-between text-[11px] font-mono pb-1.5 border-b border-primaryNavy/10">
+<span class="font-bold text-quant-slate tracking-wide">TIER 2 · 2Y BONDS</span>
+<span class="text-primaryNavy font-bold" id="tier2Yield">5.47% Yield</span>
+</div>
+<div class="mt-2.5">
+<span class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate block font-semibold">Duration Hedge Book</span>
+<div class="text-2xl font-bold font-mono text-primaryNavy tabular-nums tracking-tight mt-0.5" id="tier2Balance">$56,549,800</div>
+</div>
+<!-- Duration Shield Metadata -->
+<div class="mt-3 bg-beige-inset p-3 rounded border border-primaryNavy/15 space-y-1.5">
+<div class="flex justify-between text-[11px] font-mono">
+<span class="text-secondarySlate">Clean Index:</span>
+<span class="text-primaryNavy font-bold" id="tier2CleanPrice">98.70 <span class="text-[9.5px] text-secondarySlate">(Dur: 1.92y)</span></span>
+</div>
+<div class="flex justify-between text-[11px] font-mono">
+<span class="text-secondarySlate">MTM PnL:</span>
+<span class="text-quant-sageDeep font-bold tabular-nums" id="tier2Mtm">+$112,400</span>
+</div>
+<div class="flex justify-between text-[10.5px] font-mono text-secondarySlate pt-0.5">
+<span class="">Duration Shield: <strong class="text-primaryNavy font-semibold">Active</strong></span>
+<span class="">Haircut: 2.0%</span>
+</div>
+</div>
+</div>
+<div class="pt-2 border-t border-primaryNavy/10 flex items-center justify-between text-[10.5px] font-mono text-secondarySlate">
+<span class="font-medium">T+1 Settlement Ready</span>
+<span class="text-quant-sageDeep font-bold">Carry: +$7,460/day</span>
+</div>
+</div>
+<!-- TIER 3: Growth Equities Reserve -->
+<div class="p-4 flex flex-col justify-between space-y-3 bg-beige-surface">
+<div>
+<div class="flex items-center justify-between text-[11px] font-mono pb-1.5 border-b border-primaryNavy/10">
+<span class="font-bold text-quant-plum tracking-wide">TIER 3 · EQUITIES</span>
+<span class="text-primaryNavy font-bold" id="tier3Vol">18.0% Vol</span>
+</div>
+<div class="mt-2.5">
+<span class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate block font-semibold">High-Beta Capital Reserve</span>
+<div class="text-2xl font-bold font-mono text-primaryNavy tabular-nums tracking-tight mt-0.5" id="tier3Balance">$30,000,000</div>
+</div>
+<!-- Crash Filter & Slippage -->
+<div class="mt-3 bg-beige-inset p-3 rounded border border-primaryNavy/15 space-y-1.5">
+<div class="flex justify-between text-[11px] font-mono">
+<span class="text-secondarySlate">S&amp;P 500:</span>
+<span class="text-primaryNavy font-bold tabular-nums" id="tier3IndexPrice">4865.04</span>
+</div>
+<div class="flex justify-between text-[11px] font-mono">
+<span class="text-secondarySlate">Tail Slippage:</span>
+<span class="text-quant-terracotta font-bold">15.0% Severe</span>
+</div>
+<div class="flex justify-between items-center text-[10.5px] font-mono pt-0.5" id="tier3RegimePill">
+<span class="text-primaryNavy font-bold" id="tier3RegimeText"><i class="fa-solid fa-chart-line text-[9px] mr-1 text-quant-sageDeep"></i>BULL ACCUMULATION</span>
+<span class="text-quant-sageDeep font-bold">LIQ OFF</span>
+</div>
+</div>
+</div>
+<div class="pt-2 border-t border-primaryNavy/10 flex items-center justify-between text-[10.5px] font-mono text-secondarySlate">
+<span class="font-medium">Loan APR: 12.0%</span>
+<span class="text-quant-sageDeep font-bold">Unrealized: +$1.85M</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 2: SYNCHRONIZED ANALYTICAL CHARTS -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+<!-- Chart 1: Intraday Liquidity Envelope & P99 Buffer (7 Cols) - Warm Architectural Beige -->
+<div class="lg:col-span-7 bg-beige-surface border border-primaryNavy/20 rounded-md p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex flex-wrap items-center justify-between pb-2.5 border-b border-primaryNavy/15 gap-2">
+<div>
+<div class="flex items-center space-x-2">
+<span class="w-2.5 h-2.5 rounded-full bg-quant-cobalt"></span>
+<h2 class="font-heading font-extrabold text-sm uppercase tracking-wide text-primaryNavy">
+                Intraday Liquidity &amp; Dynamic P99 Buffer Envelope
+              </h2>
+</div>
+<p class="text-[11.5px] text-secondarySlate font-sans font-normal mt-0.5">Continuous hourly cash velocity vs machine-learned tail-risk safety cushion</p>
+</div>
+<!-- Modernist Minimal Legend -->
+<div class="flex items-center space-x-3.5 text-[11px] font-mono text-secondarySlate"><span class="flex items-center gap-1.5"><span class="w-3 h-1.5 rounded-xs" style="background-color: #62A99F;"></span><span class="font-semibold" style="color: #62A99F;">Deposits (Teal)</span></span><span class="flex items-center gap-1.5"><span class="w-3 h-1.5 rounded-xs" style="background-color: #B7A4E0;"></span><span class="font-semibold" style="color: #B7A4E0;">Withdrawals (Lavender)</span></span><span class="flex items-center gap-1.5"><span class="w-3.5 h-0.5 border-t-2 border-dashed" style="border-color: #8DB9E8;"></span><span class="font-bold" style="color: #8DB9E8;">P99 Cushion (Light Blue)</span></span></div>
+</div>
+<!-- Canvas Container -->
+<div class="relative w-full h-[270px] mt-2.5"><canvas height="540" id="intradayChart" style="display: block; box-sizing: border-box; height: 270px; width: 688px;" width="1376"></canvas><script>function applyIntradayColors(){if(window.intradayChartInstance){var chart=window.intradayChartInstance;var ctx=chart.ctx;var tealGrad=ctx.createLinearGradient(0,0,0,250);tealGrad.addColorStop(0,'rgba(98, 169, 159, 0.25)');tealGrad.addColorStop(1,'rgba(98, 169, 159, 0.01)');var lavenderGrad=ctx.createLinearGradient(0,0,0,250);lavenderGrad.addColorStop(0,'rgba(183, 164, 224, 0.2)');lavenderGrad.addColorStop(1,'rgba(183, 164, 224, 0.01)');chart.data.datasets[0].label='P99 Cushion (Light Blue)';chart.data.datasets[0].borderColor='#8DB9E8';chart.data.datasets[0].backgroundColor='transparent';chart.data.datasets[0].pointBackgroundColor='#8DB9E8';chart.data.datasets[0].pointBorderColor='#8DB9E8';chart.data.datasets[0].borderWidth=2.2;chart.data.datasets[0].borderDash=[6,4];chart.data.datasets[0].pointRadius=2;chart.data.datasets[1].label='Deposits / Inflows (Teal)';chart.data.datasets[1].borderColor='#62A99F';chart.data.datasets[1].backgroundColor=tealGrad;chart.data.datasets[1].pointBackgroundColor='#62A99F';chart.data.datasets[1].pointBorderColor='#62A99F';chart.data.datasets[1].borderWidth=2.4;chart.data.datasets[1].pointRadius=3;chart.data.datasets[2].label='Withdrawals / Outflows (Lavender)';chart.data.datasets[2].borderColor='#B7A4E0';chart.data.datasets[2].backgroundColor=lavenderGrad;chart.data.datasets[2].pointBackgroundColor='#B7A4E0';chart.data.datasets[2].pointBorderColor='#B7A4E0';chart.data.datasets[2].borderWidth=2.2;chart.data.datasets[2].pointRadius=3;chart.update();}}applyIntradayColors();window.addEventListener('load',function(){setTimeout(applyIntradayColors,100);});if(document.readyState==='complete'){setTimeout(applyIntradayColors,50);}</script></div>
+</div>
+<!-- Micro-Analysis Sub-bar -->
+<div class="mt-2 pt-2.5 border-t border-primaryNavy/15 flex flex-wrap items-center justify-between text-[11px] font-mono text-secondarySlate gap-2"><div class="flex items-center gap-4"><span class="">24h Inflow: <strong class="font-bold tabular-nums font-mono" id="dailyInflow" style="color: #62A99F;">$284.2M</strong></span><span class="">24h Outflow: <strong class="font-bold tabular-nums font-mono" id="dailyOutflow" style="color: #B7A4E0;">$271.8M</strong></span><span class="">Net Surplus: <strong class="text-primaryNavy font-bold tabular-nums font-mono" id="dailyNetSurplus">+$12.4M</strong></span></div><div class="text-[10.5px] font-sans flex items-center gap-1.5" style="color: #8DB9E8;"><span class="w-1.5 h-1.5 rounded-full" style="background-color: #8DB9E8;"></span><span class="">Quantile Window: 15-Hour Rolling Monte Carlo (P99 Envelope)</span></div></div>
+</div>
+<!-- Chart 2: FEATURED ANCHOR CONTAINER (#20334D Deep Navy Slate) - Institutional Horse-Race (5 Cols) -->
+<div class="lg:col-span-5 bg-featured border border-primaryNavy/50 rounded-md p-4 flex flex-col justify-between text-[#F5F2EB] shadow-md">
+<div>
+<div class="flex flex-wrap items-center justify-between pb-2.5 border-b border-white/15 gap-2">
+<div>
+<div class="flex items-center space-x-2">
+<span class="w-2.5 h-2.5 rounded-full bg-quant-sage"></span>
+<h2 class="font-heading font-extrabold text-sm uppercase tracking-wide text-white">
+                Institutional Benchmark Horse-Race
+              </h2>
+</div>
+<p class="text-[11.5px] text-[#A5B4C7] font-sans font-normal mt-0.5">Cumulative PnL: Algorithmic engine vs Static rule &amp; Naive chaser</p>
+</div>
+</div>
+<!-- Curated Benchmark Pills -->
+<div class="flex flex-wrap items-center gap-2 mt-2.5 text-[10.5px] font-mono"><span class="px-2 py-0.5 rounded-sm bg-white/10 text-white border border-white/20 flex items-center gap-1.5 font-medium"><span class="w-2.5 h-0.5 rounded-xs" style="background-color: #2DD4BF;"></span> AegisFlow (+4.42%)</span><span class="px-2 py-0.5 rounded-sm bg-white/5 text-[#A5B4C7] border border-white/10 flex items-center gap-1.5"><span class="w-2.5 h-0.5 rounded-xs" style="background-color: #F59E0B;"></span> Static 20/30/30/20 (+3.1%)</span><span class="px-2 py-0.5 rounded-sm bg-white/5 text-[#A5B4C7] border border-white/10 flex items-center gap-1.5"><span class="w-2.5 h-0.5 rounded-xs" style="background-color: #B49FE8;"></span> Naive Chaser (-1.8%)</span><span class="px-2 py-0.5 rounded-sm bg-white/5 text-[#A5B4C7] border border-white/10 flex items-center gap-1.5"><span class="w-2.5 h-0.5 rounded-xs" style="background-color: #94A3B8;"></span> Cash (0%)</span></div>
+<!-- Canvas Container -->
+<div class="relative w-full h-[240px] mt-2.5">
+<canvas height="480" id="benchmarkChart" style="display: block; box-sizing: border-box; height: 240px; width: 477px;" width="955"></canvas>
+<script class="">function applyBenchmarkColors(){if(window.benchmarkChartInstance){var chart=window.benchmarkChartInstance;chart.data.datasets[0].borderColor='#2DD4BF';chart.data.datasets[0].pointBackgroundColor='#2DD4BF';chart.data.datasets[0].pointBorderColor='#2DD4BF';chart.data.datasets[0].borderWidth=2.6;chart.data.datasets[0].pointRadius=3.5;chart.data.datasets[1].borderColor='#F59E0B';chart.data.datasets[1].pointBackgroundColor='#F59E0B';chart.data.datasets[1].borderWidth=2;chart.data.datasets[1].pointRadius=2;chart.data.datasets[2].borderColor='#B49FE8';chart.data.datasets[2].pointBackgroundColor='#B49FE8';chart.data.datasets[2].borderWidth=1.8;chart.data.datasets[2].borderDash=[4,4];chart.data.datasets[2].pointRadius=2;chart.data.datasets[3].borderColor='#94A3B8';chart.data.datasets[3].borderWidth=1.4;chart.data.datasets[3].pointRadius=0;chart.update();}}window.addEventListener('load',function(){setTimeout(applyBenchmarkColors,120);});if(document.readyState==='complete'){setTimeout(applyBenchmarkColors,60);}</script></div>
+</div>
+<!-- Alpha Summary -->
+<div class="mt-2 pt-2.5 border-t border-white/15 flex items-center justify-between text-[11px] font-mono">
+<span class="text-[#A5B4C7] font-sans text-xs">Generated Quant Alpha:</span>
+<span class="font-bold tabular-nums font-mono text-sm" id="horseRaceAlpha" style="color: rgb(45, 212, 191);">+$4,821,300 over Static Rule</span>
+</div>
+</div>
+</div>
+<!-- SECTION 3: SCENARIO WORKBENCH & AUDIT LOG TERMINAL -->
+<div class="border border-primaryNavy/20 rounded-md bg-beige-surface shadow-sm overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-primaryNavy/20">
+<!-- Interactive Scenario Replay & Stress-Test Lab (7 Cols) -->
+<div class="lg:col-span-7 p-4 flex flex-col justify-between space-y-3.5 bg-beige-surface">
+<div>
+<!-- Header -->
+<div class="flex items-center justify-between pb-2.5 border-b border-primaryNavy/15">
+<div class="flex items-center space-x-2">
+<i class="fa-solid fa-sliders text-primaryNavy text-xs"></i>
+<h2 class="font-heading font-extrabold text-xs uppercase tracking-wide text-primaryNavy">
+                Scenario Replay &amp; Stress-Test Lab
+              </h2>
+</div>
+<span class="text-[10.5px] font-mono text-secondarySlate bg-beige-inset px-2.5 py-0.5 rounded border border-primaryNavy/15 font-semibold">
+              8,760-HOUR DATASET BINDING
+            </span>
+</div>
+<!-- Scrub Slider Bar -->
+<div class="mt-3 bg-beige-inset p-3 rounded border border-primaryNavy/15 space-y-2">
+<div class="flex justify-between items-center text-[11px] font-mono">
+<span class="text-secondarySlate flex items-center gap-1.5 font-medium">
+<i class="fa-solid fa-timeline text-secondarySlate"></i> Annual Scrub Cursor:
+              </span>
+<span class="text-primaryNavy font-bold" id="sliderHourDisplay">Hour 7,632 / 8,760 (87.1% of Year)</span>
+</div>
+<input class="w-full h-1.5 bg-beige-sunken rounded-lg appearance-none cursor-pointer accent-quant-prussian focus:outline-none" id="timelineSlider" max="1000" min="0" oninput="onSliderScrub(this.value)" type="range" value="870"/>
+<div class="flex justify-between text-[10.5px] font-mono text-secondarySlate">
+<span class="">2026-01-01 00:00</span>
+<span class="font-medium">Mid-Year Rebalance</span>
+<span class="">2026-12-31 23:00</span>
+</div>
+</div>
+<!-- Tactile Stress-Test Buttons -->
+<div class="mt-3">
+<span class="text-[10px] uppercase font-mono tracking-wider text-secondarySlate block mb-1.5 font-bold">Edge-Case Stress Presets (Click to Inspect)</span>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+<button class="tactile-btn p-2.5 rounded text-left group shadow-xs" onclick="jumpToScenario('payday')">
+<div class="text-[10px] text-quant-cobalt font-mono font-bold flex items-center gap-1">
+<i class="fa-solid fa-money-bill-wave text-[9px]"></i> PAYDAY SURGE
+                </div>
+<div class="text-[11.5px] text-primaryNavy mt-0.5 font-mono font-bold">+$24M/hr Inflow</div>
+<div class="text-[10px] text-secondarySlate font-sans font-medium mt-0.5">June 1st Payroll</div>
+</button>
+<button class="tactile-btn p-2.5 rounded text-left group shadow-xs" onclick="jumpToScenario('blackswan')">
+<div class="text-[10px] text-quant-copper font-mono font-bold flex items-center gap-1">
+<i class="fa-solid fa-arrow-down-wide-short text-[9px]"></i> BLACK SWAN
+                </div>
+<div class="text-[11.5px] text-primaryNavy mt-0.5 font-mono font-bold">-$32.5M/hr Outflow</div>
+<div class="text-[10px] text-secondarySlate font-sans font-medium mt-0.5">Nov 14 Panic Run</div>
+</button>
+<button class="tactile-btn p-2.5 rounded text-left group shadow-xs" onclick="jumpToScenario('crash')">
+<div class="text-[10px] text-quant-plum font-mono font-bold flex items-center gap-1">
+<i class="fa-solid fa-burst text-[9px]"></i> STOCK CRASH
+                </div>
+<div class="text-[11.5px] text-primaryNavy mt-0.5 font-mono font-bold">-28.8% Equities</div>
+<div class="text-[10px] text-secondarySlate font-sans font-medium mt-0.5">Halt Liquidation</div>
+</button>
+<button class="tactile-btn p-2.5 rounded text-left group shadow-xs" onclick="jumpToScenario('shock')">
+<div class="text-[10px] text-quant-prussian font-mono font-bold flex items-center gap-1">
+<i class="fa-solid fa-bolt text-[9px] text-quant-slate"></i> 3X SHOCK
+                </div>
+<div class="text-[11.5px] text-primaryNavy mt-0.5 font-mono font-bold">Tail Solved</div>
+<div class="text-[10px] text-secondarySlate font-sans font-medium mt-0.5">Buffer Dynamic Exp.</div>
+</button>
+</div>
+</div>
+</div>
+<!-- Guardrails Bar -->
+<div class="pt-2.5 border-t border-primaryNavy/15 flex flex-wrap items-center justify-between text-[10.5px] font-mono text-secondarySlate gap-2">
+<div class="flex items-center gap-3">
+<span class="">Overdraft APR: <strong class="text-primaryNavy font-semibold">12.0%</strong></span>
+<span class="">Bond Haircut: <strong class="text-primaryNavy font-semibold">2.0%</strong></span>
+<span class="">Equity Haircut: <strong class="text-primaryNavy font-semibold">15.0%</strong></span>
+</div>
+<span class="text-primaryNavy font-bold text-[10px]"><i class="fa-solid fa-shield text-[9px] text-quant-sageDeep mr-1"></i>Zero-Break Mandate: ACTIVE</span>
+</div>
+</div>
+<!-- Algorithmic Execution Audit Feed (5 Cols) -->
+<div class="lg:col-span-5 p-4 flex flex-col justify-between space-y-3.5 bg-beige-surface">
+<div>
+<!-- Header & Terminal Filter -->
+<div class="flex items-center justify-between pb-2.5 border-b border-primaryNavy/15">
+<div class="flex items-center space-x-2">
+<i class="fa-solid fa-terminal text-primaryNavy text-xs"></i>
+<h2 class="font-heading font-extrabold text-xs uppercase tracking-wide text-primaryNavy">
+                Algorithmic Audit Feed
+              </h2>
+</div>
+<div class="flex items-center space-x-1 font-mono text-[10.5px]">
+<span class="text-secondarySlate mr-1 font-medium">Filter:</span>
+<button class="px-2 py-0.5 rounded-sm bg-primaryNavy text-beige-50 font-bold log-filter active" data-filter="ALL" onclick="filterLogs('ALL')">All</button>
+<button class="px-2 py-0.5 rounded-sm bg-beige-inset text-primaryNavy hover:bg-beige-sunken font-semibold log-filter" data-filter="SWEEP" onclick="filterLogs('SWEEP')">Sweep</button>
+<button class="px-2 py-0.5 rounded-sm bg-beige-inset text-primaryNavy hover:bg-beige-sunken font-semibold log-filter" data-filter="DEFICIT" onclick="filterLogs('DEFICIT')">Deficit</button>
+</div>
+</div>
+<!-- Audit Log Feed -->
+<div class="mt-2.5 h-[225px] overflow-y-auto terminal-scrollbar bg-beige-inset p-2.5 rounded border border-primaryNavy/15 text-[11px] font-mono space-y-1.5" id="auditLogFeed">
+<div class="flex items-start space-x-2 py-1.5 border-b border-primaryNavy/10 last:border-0 hover:bg-beige-surface px-1.5 rounded transition">
+<span class="text-secondarySlate text-[10px] tabular-nums whitespace-nowrap pt-0.5 font-medium">16:00:00</span>
+<span class="px-1.5 py-0.2 rounded text-[8.5px] uppercase border font-bold bg-primaryNavy/10 text-primaryNavy border-primaryNavy/20 whitespace-nowrap">INFO</span>
+<span class="text-primaryNavy leading-snug text-[11px] font-sans font-medium">Hourly tick validated. Inflow $11.0M vs Outflow $16.3M (Net -$5.36M). Tier 0 absorbing smoothly.</span>
+</div>
+<div class="flex items-start space-x-2 py-1.5 border-b border-primaryNavy/10 last:border-0 hover:bg-beige-surface px-1.5 rounded transition">
+<span class="text-secondarySlate text-[10px] tabular-nums whitespace-nowrap pt-0.5 font-medium">15:42:19</span>
+<span class="px-1.5 py-0.2 rounded text-[8.5px] uppercase border font-bold bg-quant-brass/20 text-quant-ochre border-quant-brass/30 whitespace-nowrap">DEFICIT</span>
+<span class="text-primaryNavy leading-snug text-[11px] font-sans font-medium">Tail risk probe: P99 safety envelope at $15.2M. Actual Buffer $18.45M (121% surplus).</span>
+</div>
+<div class="flex items-start space-x-2 py-1.5 border-b border-primaryNavy/10 last:border-0 hover:bg-beige-surface px-1.5 rounded transition">
+<span class="text-secondarySlate text-[10px] tabular-nums whitespace-nowrap pt-0.5 font-medium">15:00:00</span>
+<span class="px-1.5 py-0.2 rounded text-[8.5px] uppercase border font-bold bg-primaryNavy/10 text-primaryNavy border-primaryNavy/20 whitespace-nowrap">INFO</span>
+<span class="text-primaryNavy leading-snug text-[11px] font-sans font-medium">Tier 3 Blue-Chip S&amp;P holding $4,863.42. Volatility 18.0%. Rebalance threshold intact.</span>
+</div>
+<div class="flex items-start space-x-2 py-1.5 border-b border-primaryNavy/10 last:border-0 hover:bg-beige-surface px-1.5 rounded transition">
+<span class="text-secondarySlate text-[10px] tabular-nums whitespace-nowrap pt-0.5 font-medium">14:18:04</span>
+<span class="px-1.5 py-0.2 rounded text-[8.5px] uppercase border font-bold bg-quant-sage/20 text-quant-sageDeep border-quant-sageDeep/30 whitespace-nowrap">SWEEP</span>
+<span class="text-primaryNavy leading-snug text-[11px] font-sans font-medium">17:00 Sweep approaching: Pre-allocating $3.25M excess cash to Overnight Repo.</span>
+</div>
+<div class="flex items-start space-x-2 py-1.5 border-b border-primaryNavy/10 last:border-0 hover:bg-beige-surface px-1.5 rounded transition">
+<span class="text-secondarySlate text-[10px] tabular-nums whitespace-nowrap pt-0.5 font-medium">12:00:00</span>
+<span class="px-1.5 py-0.2 rounded text-[8.5px] uppercase border font-bold bg-quant-slate/20 text-quant-slate border-quant-slate/30 whitespace-nowrap">DURATION</span>
+<span class="text-primaryNavy leading-snug text-[11px] font-sans font-medium">2Y Sovereign Yield at 5.51% (Index 98.62). Duration Shield holding MTM at +$112.4k.</span>
+</div>
+<div class="flex items-start space-x-2 py-1.5 border-b border-primaryNavy/10 last:border-0 hover:bg-beige-surface px-1.5 rounded transition">
+<span class="text-secondarySlate text-[10px] tabular-nums whitespace-nowrap pt-0.5 font-medium">08:00:00</span>
+<span class="px-1.5 py-0.2 rounded text-[8.5px] uppercase border font-bold bg-quant-sage/20 text-quant-sageDeep border-quant-sageDeep/30 whitespace-nowrap">SWEEP</span>
+<span class="text-primaryNavy leading-snug text-[11px] font-sans font-medium">Repo maturity complete. $45.0M principal + $5,289 overnight interest unlocked.</span>
+</div>
+</div>
+</div>
+<!-- Terminal Telemetry Status -->
+<div class="pt-2.5 border-t border-primaryNavy/15 flex items-center justify-between text-[10.5px] font-mono text-secondarySlate">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-quant-sageDeep"></span>
+<span class="">WebSocket: <strong class="text-primaryNavy font-semibold">wss://engine.aegis.bank/v1/ticks</strong></span>
+</span>
+<span class="font-medium">Latency: 1.4ms</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BOTTOM FOOTER -->
+<footer class="bg-beige-surface border-t border-primaryNavy/20 px-4 py-2 text-xs font-mono text-secondarySlate flex flex-wrap items-center justify-between gap-2 mt-auto">
+<div class="flex items-center space-x-3">
+<span class="font-heading font-bold text-primaryNavy tracking-wide">AEGISFLOW QUANTITATIVE TREASURY CORP.</span>
+<span class="text-primaryNavy/30">|</span>
+<span class="hidden sm:inline">HIGH-VELOCITY RESERVE ENGINE</span>
+<span class="text-primaryNavy/30 hidden sm:inline">|</span>
+<span class="text-quant-sageDeep font-bold text-[11px]">P99 TAIL SOLVER ENGAGED</span>
+</div>
+<div class="flex items-center space-x-4 text-[11px]">
+<span class="">DATASET: <strong class="text-primaryNavy font-semibold">treasury_4tier_dataset.csv</strong></span>
+<span class="">CLEARANCE: <strong class="text-primaryNavy font-bold">L4 INSTITUTIONAL</strong></span>
+</div>
+</footer>
+<!-- QUANTITATIVE CLIENT-SIDE LOGIC & LIVE REPLAY ENGINE -->
+<script>
+    const treasuryDataset = [
+      { timestamp: "2026-06-01 07:00:00", deposits: 17989790, withdrawals: 7890573, net_flow: 10099217, repo_open: false, repo_mature: false, repo_rate: 3.87, bond_yield: 4.07, bond_idx: 101.39, stock_idx: 4483.34, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 08:00:00", deposits: 23114231, withdrawals: 8818153, net_flow: 14296078, repo_open: false, repo_mature: true,  repo_rate: 3.86, bond_yield: 4.04, bond_idx: 101.45, stock_idx: 4475.88, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 09:00:00", deposits: 23982428, withdrawals: 10230992, net_flow: 13751436, repo_open: false, repo_mature: false, repo_rate: 3.86, bond_yield: 4.03, bond_idx: 101.47, stock_idx: 4478.05, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 10:00:00", deposits: 21481862, withdrawals: 11324918, net_flow: 10156944, repo_open: false, repo_mature: false, repo_rate: 3.87, bond_yield: 4.04, bond_idx: 101.44, stock_idx: 4475.65, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 11:00:00", deposits: 31691565, withdrawals: 12494909, net_flow: 19196656, repo_open: false, repo_mature: false, repo_rate: 3.88, bond_yield: 4.06, bond_idx: 101.41, stock_idx: 4459.52, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 12:00:00", deposits: 37777699, withdrawals: 13646991, net_flow: 24130708, repo_open: false, repo_mature: false, repo_rate: 3.87, bond_yield: 4.08, bond_idx: 101.38, stock_idx: 4462.41, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 13:00:00", deposits: 15182699, withdrawals: 13119477, net_flow: 2063222,  repo_open: false, repo_mature: false, repo_rate: 3.86, bond_yield: 4.11, bond_idx: 101.31, stock_idx: 4479.41, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 14:00:00", deposits: 14423618, withdrawals: 14558036, net_flow: -134418,  repo_open: false, repo_mature: false, repo_rate: 3.86, bond_yield: 4.07, bond_idx: 101.39, stock_idx: 4494.11, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 15:00:00", deposits: 14503419, withdrawals: 13507074, net_flow: 996345,   repo_open: false, repo_mature: false, repo_rate: 3.87, bond_yield: 4.04, bond_idx: 101.45, stock_idx: 4495.25, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 16:00:00", deposits: 14384084, withdrawals: 14094558, net_flow: 289526,   repo_open: false, repo_mature: false, repo_rate: 3.86, bond_yield: 4.05, bond_idx: 101.42, stock_idx: 4490.78, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 17:00:00", deposits: 14111074, withdrawals: 15701124, net_flow: -1590050, repo_open: true,  repo_mature: false, repo_rate: 3.87, bond_yield: 4.07, bond_idx: 101.38, stock_idx: 4496.69, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 18:00:00", deposits: 12588349, withdrawals: 13339807, net_flow: -751458,  repo_open: false, repo_mature: false, repo_rate: 3.87, bond_yield: 4.09, bond_idx: 101.35, stock_idx: 4499.53, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 19:00:00", deposits: 11018523, withdrawals: 13095839, net_flow: -2077316, repo_open: false, repo_mature: false, repo_rate: 3.87, bond_yield: 4.16, bond_idx: 101.22, stock_idx: 4498.14, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 20:00:00", deposits: 11251912, withdrawals: 11398267, net_flow: -146355,  repo_open: false, repo_mature: false, repo_rate: 3.87, bond_yield: 4.14, bond_idx: 101.26, stock_idx: 4517.57, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 21:00:00", deposits: 9444160,  withdrawals: 9692086,  net_flow: -247926,  repo_open: false, repo_mature: false, repo_rate: 3.88, bond_yield: 4.15, bond_idx: 101.24, stock_idx: 4513.49, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 22:00:00", deposits: 7538042,  withdrawals: 8003464,  net_flow: -465422,  repo_open: false, repo_mature: false, repo_rate: 3.87, bond_yield: 4.15, bond_idx: 101.24, stock_idx: 4523.55, stock_vol: 18.0 },
+      { timestamp: "2026-06-01 23:00:00", deposits: 7304903,  withdrawals: 7259966,  net_flow: 44937,    repo_open: false, repo_mature: false, repo_rate: 3.88, bond_yield: 4.16, bond_idx: 101.21, stock_idx: 4525.12, stock_vol: 18.0 },
+      
+      // Black swan / heavy drain slice
+      { timestamp: "2026-11-14 12:00:00", deposits: 10642663, withdrawals: 14724725, net_flow: -4082062, repo_open: false, repo_mature: false, repo_rate: 4.26, bond_yield: 5.51, bond_idx: 98.62, stock_idx: 4886.11, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 13:00:00", deposits: 11114009, withdrawals: 18389335, net_flow: -7275326, repo_open: false, repo_mature: false, repo_rate: 4.26, bond_yield: 5.50, bond_idx: 98.65, stock_idx: 4874.27, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 14:00:00", deposits: 12274589, withdrawals: 15478480, net_flow: -3203891, repo_open: false, repo_mature: false, repo_rate: 4.26, bond_yield: 5.46, bond_idx: 98.72, stock_idx: 4859.43, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 15:00:00", deposits: 11803745, withdrawals: 17910272, net_flow: -6106528, repo_open: false, repo_mature: false, repo_rate: 4.27, bond_yield: 5.45, bond_idx: 98.74, stock_idx: 4863.42, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 16:00:00", deposits: 11019415, withdrawals: 16382802, net_flow: -5363387, repo_open: false, repo_mature: false, repo_rate: 4.26, bond_yield: 5.47, bond_idx: 98.70, stock_idx: 4865.04, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 17:00:00", deposits: 10897318, withdrawals: 17020365, net_flow: -6123047, repo_open: true,  repo_mature: false, repo_rate: 4.26, bond_yield: 5.52, bond_idx: 98.61, stock_idx: 4850.65, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 18:00:00", deposits: 10957359, withdrawals: 15628299, net_flow: -4670940, repo_open: false, repo_mature: false, repo_rate: 4.26, bond_yield: 5.54, bond_idx: 98.57, stock_idx: 4850.12, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 19:00:00", deposits: 9726935,  withdrawals: 14049283, net_flow: -4322348, repo_open: false, repo_mature: false, repo_rate: 4.27, bond_yield: 5.55, bond_idx: 98.54, stock_idx: 4849.61, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 20:00:00", deposits: 9096111,  withdrawals: 13391905, net_flow: -4295794, repo_open: false, repo_mature: false, repo_rate: 4.27, bond_yield: 5.51, bond_idx: 98.63, stock_idx: 4857.96, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 21:00:00", deposits: 7389992,  withdrawals: 11046396, net_flow: -3656404, repo_open: false, repo_mature: false, repo_rate: 4.27, bond_yield: 5.51, bond_idx: 98.63, stock_idx: 4881.71, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 22:00:00", deposits: 7326479,  withdrawals: 8582721,  net_flow: -1256242, repo_open: false, repo_mature: false, repo_rate: 4.27, bond_yield: 5.49, bond_idx: 98.67, stock_idx: 4858.28, stock_vol: 18.0 },
+      { timestamp: "2026-11-14 23:00:00", deposits: 5936522,  withdrawals: 7984871,  net_flow: -2048349, repo_open: false, repo_mature: false, repo_rate: 4.27, bond_yield: 5.45, bond_idx: 98.74, stock_idx: 4867.36, stock_vol: 18.0 },
+      { timestamp: "2026-11-15 00:00:00", deposits: 5009916,  withdrawals: 4738046,  net_flow: 271870,   repo_open: false, repo_mature: false, repo_rate: 4.25, bond_yield: 5.42, bond_idx: 98.80, stock_idx: 4859.58, stock_vol: 18.0 },
+      
+      // Stock market crash slice
+      { timestamp: "2026-11-30 16:00:00", deposits: 15637036, withdrawals: 14794784, net_flow: 842252,   repo_open: false, repo_mature: false, repo_rate: 4.10, bond_yield: 5.13, bond_idx: 99.36, stock_idx: 3643.08, stock_vol: 28.5 },
+      { timestamp: "2026-11-30 17:00:00", deposits: 13644484, withdrawals: 14011133, net_flow: -366649,  repo_open: true,  repo_mature: false, repo_rate: 4.11, bond_yield: 5.09, bond_idx: 99.43, stock_idx: 3639.09, stock_vol: 32.0 },
+      { timestamp: "2026-11-30 18:00:00", deposits: 13682443, withdrawals: 10976160, net_flow: 2706283,  repo_open: false, repo_mature: false, repo_rate: 4.11, bond_yield: 5.09, bond_idx: 99.43, stock_idx: 3626.49, stock_vol: 34.0 },
+      { timestamp: "2026-11-30 19:00:00", deposits: 9690001,  withdrawals: 12547053, net_flow: -2857052, repo_open: false, repo_mature: false, repo_rate: 4.11, bond_yield: 5.11, bond_idx: 99.39, stock_idx: 3617.56, stock_vol: 35.0 },
+      { timestamp: "2026-11-30 20:00:00", deposits: 11316898, withdrawals: 10949710, net_flow: 367188,   repo_open: false, repo_mature: false, repo_rate: 4.12, bond_yield: 5.10, bond_idx: 99.42, stock_idx: 3620.09, stock_vol: 33.0 },
+      { timestamp: "2026-11-30 21:00:00", deposits: 8439308,  withdrawals: 9194778,  net_flow: -755469,  repo_open: false, repo_mature: false, repo_rate: 4.12, bond_yield: 5.12, bond_idx: 99.36, stock_idx: 3619.71, stock_vol: 32.0 },
+      { timestamp: "2026-11-30 22:00:00", deposits: 7526326,  withdrawals: 8562894,  net_flow: -1036568, repo_open: false, repo_mature: false, repo_rate: 4.13, bond_yield: 5.15, bond_idx: 99.32, stock_idx: 3619.99, stock_vol: 30.0 },
+      { timestamp: "2026-11-30 23:00:00", deposits: 6805819,  withdrawals: 7249552,  net_flow: -443733,  repo_open: false, repo_mature: false, repo_rate: 4.13, bond_yield: 5.15, bond_idx: 99.32, stock_idx: 3622.17, stock_vol: 29.0 },
+      { timestamp: "2026-12-01 00:00:00", deposits: 6894206,  withdrawals: 6551950,  net_flow: 342255,   repo_open: false, repo_mature: false, repo_rate: 4.13, bond_yield: 5.14, bond_idx: 99.33, stock_idx: 3615.35, stock_vol: 28.0 }
+    ];
+
+    let currentIndex = 21;
+    let isPlaying = false;
+    let playInterval = null;
+    let playbackSpeed = 1;
+    let activeLogFilter = 'ALL';
+
+    let tier0Bal = 13086813;
+    let tier1Bal = 45000000;
+    let tier2Bal = 56549800;
+    let tier3Bal = 30000000;
+    let totalNAV = 144636613;
+    let cumulativeYield = 6420110;
+    let totalHaircutsPaid = 0;
+    let auditLogs = [];
+
+    let intradayChartInstance = null;
+    let benchmarkChartInstance = null;
+
+    const formatUSD = (val) => {
+      const sign = val < 0 ? '-' : '';
+      const absVal = Math.abs(val);
+      if (absVal >= 1e6) {
+        return `${sign}$${(absVal / 1e6).toFixed(2)}M`;
+      } else if (absVal >= 1e3) {
+        return `${sign}$${(absVal / 1e3).toFixed(0)}k`;
+      }
+      return `${sign}$${absVal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    };
+
+    const formatPreciseUSD = (val) => {
+      return '$' + Math.round(val).toLocaleString('en-US');
+    };
+
+    function calculateP99Target(dataRow) {
+      const hourlyVol = Math.max(8000000, dataRow.withdrawals * 0.95);
+      return Math.round(hourlyVol * 1.05);
+    }
+
+    function initLogs() {
+      auditLogs = [
+        { time: "16:00:00", type: "INFO", text: "Hourly tick validated. Inflow $11.0M vs Outflow $16.3M (Net -$5.36M). Tier 0 absorbing smoothly." },
+        { time: "15:42:19", type: "DEFICIT", text: "Tail risk probe: P99 safety envelope at $15.2M. Actual Buffer $18.45M (121% surplus)." },
+        { time: "15:00:00", type: "INFO", text: "Tier 3 Blue-Chip S&P holding $4,863.42. Volatility 18.0%. Rebalance threshold intact." },
+        { time: "14:18:04", type: "SWEEP", text: "17:00 Sweep approaching: Pre-allocating $3.25M excess cash to Overnight Repo." },
+        { time: "12:00:00", type: "DURATION", text: "2Y Sovereign Yield at 5.51% (Index 98.62). Duration Shield holding MTM at +$112.4k." },
+        { time: "08:00:00", type: "SWEEP", text: "Repo maturity complete. $45.0M principal + $5,289 overnight interest unlocked." }
+      ];
+      renderLogs();
+    }
+
+    function addLog(time, type, text) {
+      auditLogs.unshift({ time, type, text });
+      if (auditLogs.length > 40) auditLogs.pop();
+      renderLogs();
+    }
+
+    function filterLogs(type) {
+      activeLogFilter = type;
+      document.querySelectorAll('.log-filter').forEach(btn => {
+        if (btn.dataset.filter === type) {
+          btn.className = "px-2 py-0.5 rounded-sm bg-primaryNavy text-beige-50 font-bold log-filter active";
+        } else {
+          btn.className = "px-2 py-0.5 rounded-sm bg-beige-inset text-primaryNavy hover:bg-beige-sunken font-semibold log-filter";
+        }
+      });
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const container = document.getElementById('auditLogFeed');
+      if (!container) return;
+      
+      const filtered = activeLogFilter === 'ALL' 
+        ? auditLogs 
+        : auditLogs.filter(l => l.type === activeLogFilter || (activeLogFilter === 'SWEEP' && l.type === 'SWEEP') || (activeLogFilter === 'DEFICIT' && l.type === 'DEFICIT'));
+
+      container.innerHTML = filtered.map(log => {
+        let tagClass = 'bg-primaryNavy/10 text-primaryNavy border-primaryNavy/20';
+        if (log.type === 'SWEEP') tagClass = 'bg-quant-sage/20 text-quant-sageDeep border-quant-sageDeep/30';
+        if (log.type === 'DEFICIT') tagClass = 'bg-quant-brass/20 text-quant-ochre border-quant-brass/30';
+        if (log.type === 'HAIRCUT') tagClass = 'bg-quant-terracotta/20 text-quant-terracotta border-quant-terracotta/30';
+        if (log.type === 'DURATION') tagClass = 'bg-quant-slate/20 text-quant-slate border-quant-slate/30';
+
+        return `
+          <div class="flex items-start space-x-2 py-1.5 border-b border-primaryNavy/10 last:border-0 hover:bg-beige-surface px-1.5 rounded transition">
+            <span class="text-secondarySlate text-[10px] tabular-nums whitespace-nowrap pt-0.5 font-medium">${log.time}</span>
+            <span class="px-1.5 py-0.2 rounded text-[8.5px] uppercase border font-bold ${tagClass} whitespace-nowrap">${log.type}</span>
+            <span class="text-primaryNavy leading-snug text-[11px] font-sans font-medium">${log.text}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateUI(tickData) {
+      const timeStr = tickData.timestamp.split(' ')[1];
+      const hourVal = parseInt(timeStr.split(':')[0], 10);
+      const p99Target = calculateP99Target(tickData);
+
+      const net = tickData.net_flow;
+      tier0Bal += net;
+
+      let isSweepWindow = (hourVal === 17);
+      let isRepoMature = (hourVal === 8);
+
+      if (isSweepWindow && tier0Bal > p99Target) {
+        const excess = Math.max(0, tier0Bal - p99Target);
+        tier0Bal -= excess;
+        tier1Bal += excess;
+        addLog(timeStr, "SWEEP", `[17:00_SWEEP] Retained P99 buffer ${formatUSD(p99Target)}. Swept ${formatUSD(excess)} into Overnight Repo @ ${tickData.repo_rate}% APY.`);
+      } else if (isRepoMature) {
+        const accruedInterest = Math.round(tier1Bal * (tickData.repo_rate / 100) / 365);
+        cumulativeYield += accruedInterest;
+        addLog(timeStr, "SWEEP", `[08:00_SETTLE] Repo matured. Principal + yield (+${formatUSD(accruedInterest)}) unlocked to Tier 0.`);
+      }
+
+      if (tier0Bal < 0) {
+        const deficit = Math.abs(tier0Bal);
+        if (tier1Bal >= deficit) {
+          const penalty = deficit * 0.005;
+          totalHaircutsPaid += penalty;
+          tier1Bal -= (deficit + penalty);
+          tier0Bal = 0;
+          addLog(timeStr, "DEFICIT", `[TIER1_BREAK] Withdrawal spike ${formatUSD(deficit)} absorbed via Repo unlock. Fee: ${formatUSD(penalty)}`);
+        } else {
+          const penalty = deficit * 0.02;
+          totalHaircutsPaid += penalty;
+          tier2Bal -= (deficit + penalty);
+          tier0Bal = 0;
+          addLog(timeStr, "HAIRCUT", `[TIER2_LIQUIDATION] Envelope deficit! Liquidated 2Y Bonds with 2% haircut: ${formatUSD(penalty)}`);
+        }
+      }
+
+      totalNAV = tier0Bal + tier1Bal + tier2Bal + tier3Bal;
+      document.getElementById('currentTickLabel').innerText = tickData.timestamp;
+      
+      const dateObj = new Date(tickData.timestamp.replace(' ', 'T') + 'Z');
+      const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+      document.getElementById('currentDayOfWeek').innerText = days[dateObj.getUTCDay()] || "TRADING DAY";
+
+      document.getElementById('kpiTotalAum').innerText = formatPreciseUSD(totalNAV);
+      document.getElementById('kpiNetYield').innerText = '+' + formatPreciseUSD(cumulativeYield);
+      document.getElementById('kpiNetFlow').innerText = (net >= 0 ? '+' : '') + formatPreciseUSD(net);
+      document.getElementById('kpiNetFlow').className = `text-base lg:text-lg font-bold font-mono tabular-nums mt-0.5 ${net >= 0 ? 'text-quant-sageDeep' : 'text-quant-copper'}`;
+      document.getElementById('kpiDepositHourly').innerText = formatUSD(tickData.deposits);
+      document.getElementById('kpiWithdrawalHourly').innerText = formatUSD(tickData.withdrawals);
+      document.getElementById('kpiHaircutsPaid').innerText = formatPreciseUSD(totalHaircutsPaid);
+      document.getElementById('kpiHaircutsPaid').className = `text-base lg:text-lg font-bold font-mono tabular-nums mt-0.5 ${totalHaircutsPaid > 0 ? 'text-quant-terracotta' : 'text-quant-sageDeep'}`;
+
+      // Tier 0
+      document.getElementById('tier0Balance').innerText = formatPreciseUSD(tier0Bal);
+      document.getElementById('tier0Target').innerText = formatPreciseUSD(p99Target);
+      const ratio = Math.round((tier0Bal / p99Target) * 100);
+      document.getElementById('tier0Ratio').innerText = ratio + '%';
+      document.getElementById('tier0GaugeBar').style.width = Math.min(100, Math.max(5, ratio)) + '%';
+      
+      const statusPill = document.getElementById('tier0StatusPill');
+      if (ratio >= 115) {
+        statusPill.className = "text-[9px] px-1.5 py-0.5 rounded font-bold bg-quant-sage/20 text-quant-sageDeep border border-quant-sageDeep/30 uppercase";
+        statusPill.innerText = "OPTIMAL CUSHION";
+      } else if (ratio >= 90) {
+        statusPill.className = "text-[9px] px-1.5 py-0.5 rounded font-bold bg-quant-slate/20 text-quant-slate border border-quant-slate/30 uppercase";
+        statusPill.innerText = "ADEQUATE BUFFER";
+      } else {
+        statusPill.className = "text-[9px] px-1.5 py-0.5 rounded font-bold bg-quant-terracotta/20 text-quant-terracotta border border-quant-terracotta/30 uppercase";
+        statusPill.innerText = "DEFICIT WARNING";
+      }
+
+      // Tier 1
+      document.getElementById('tier1Balance').innerText = formatPreciseUSD(tier1Bal);
+      document.getElementById('tier1Rate').innerText = tickData.repo_rate.toFixed(2) + '% APY';
+      
+      const hoursToMaturity = hourVal < 8 ? (8 - hourVal) : (24 - hourVal + 8);
+      const tier1BadgeText = document.getElementById('tier1BadgeText');
+      const tier1Progress = document.getElementById('tier1Progress');
+
+      if (hourVal === 17) {
+        tier1BadgeText.innerHTML = '<i class="fa-solid fa-arrow-down-to-bracket text-quant-sageDeep mr-1"></i> Sweep Window Open';
+        document.getElementById('tier1RemainingHours').innerText = "CLOSES 17:59";
+        tier1Progress.style.width = "100%";
+        tier1Progress.className = "bg-quant-sageDeep h-1.5 rounded-full transition-all duration-300";
+      } else {
+        tier1BadgeText.innerHTML = '<i class="fa-solid fa-lock text-[9px] text-quant-brass mr-1"></i> Locked until 08:00';
+        document.getElementById('tier1RemainingHours').innerText = `${hoursToMaturity}h left`;
+        const pct = Math.round(((15 - Math.min(15, hoursToMaturity)) / 15) * 100);
+        tier1Progress.style.width = pct + "%";
+        tier1Progress.className = "bg-quant-brass h-1.5 rounded-full transition-all duration-300";
+      }
+
+      // Tier 2
+      document.getElementById('tier2Balance').innerText = formatPreciseUSD(tier2Bal);
+      document.getElementById('tier2Yield').innerText = tickData.bond_yield.toFixed(2) + '% Yield';
+      document.getElementById('tier2CleanPrice').innerHTML = `${tickData.bond_idx.toFixed(2)} <span class="text-[9.5px] text-secondarySlate">(Dur: 1.92y)</span>`;
+
+      // Tier 3
+      document.getElementById('tier3Balance').innerText = formatPreciseUSD(tier3Bal);
+      document.getElementById('tier3IndexPrice').innerText = tickData.stock_idx.toFixed(2);
+      document.getElementById('tier3Vol').innerText = tickData.stock_vol.toFixed(1) + '% Vol';
+      
+      const tier3Pill = document.getElementById('tier3RegimePill');
+      const tier3Text = document.getElementById('tier3RegimeText');
+      if (tickData.stock_vol > 25 || tickData.stock_idx < 3800) {
+        tier3Text.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-[9px] mr-1 text-quant-plum"></i>BEAR CRASH FILTER';
+        tier3Pill.children[1].className = "text-quant-plum font-bold";
+        tier3Pill.children[1].innerText = "HALTED";
+      } else {
+        tier3Text.innerHTML = '<i class="fa-solid fa-chart-line text-[9px] mr-1 text-quant-sageDeep"></i>BULL ACCUMULATION';
+        tier3Pill.children[1].className = "text-quant-sageDeep font-bold";
+        tier3Pill.children[1].innerText = "LIQ OFF";
+      }
+    }
+
+    // Chart.js Setup conforming strictly to the requested bespoke palette & beige backdrop
+    function initCharts() {
+      // 1. Intraday Liquidity Envelope Chart
+      const intradayCtx = document.getElementById('intradayChart').getContext('2d');
+      
+      const labels = treasuryDataset.slice(0, 24).map(d => d.timestamp.split(' ')[1].substring(0, 5));
+      const depositsData = treasuryDataset.slice(0, 24).map(d => d.deposits / 1e6);
+      const withdrawalsData = treasuryDataset.slice(0, 24).map(d => d.withdrawals / 1e6);
+      const p99Data = treasuryDataset.slice(0, 24).map(d => calculateP99Target(d) / 1e6);
+
+      const depositsGrad = intradayCtx.createLinearGradient(0, 0, 0, 250);
+      depositsGrad.addColorStop(0, 'rgba(98, 169, 159, 0.25)');
+      depositsGrad.addColorStop(1, 'rgba(98, 169, 159, 0.01)');
+
+      const withdrawalsGrad = intradayCtx.createLinearGradient(0, 0, 0, 250);
+      withdrawalsGrad.addColorStop(0, 'rgba(183, 164, 224, 0.2)');
+      withdrawalsGrad.addColorStop(1, 'rgba(183, 164, 224, 0.01)');
+
+      intradayChartInstance = new Chart(intradayCtx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'P99 Cushion (Light Blue)',
+              data: p99Data,
+              borderColor: '#8DB9E8',
+              backgroundColor: 'transparent',
+              borderWidth: 2.2,
+              borderDash: [6, 4],
+              fill: false,
+              tension: 0.3,
+              pointRadius: 2,
+              pointBackgroundColor: '#8DB9E8',
+              pointBorderColor: '#8DB9E8'
+            },
+            {
+              label: 'Deposits / Inflows (Teal)',
+              data: depositsData,
+              borderColor: '#62A99F',
+              backgroundColor: depositsGrad,
+              borderWidth: 2.4,
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              pointBackgroundColor: '#62A99F',
+              pointBorderColor: '#62A99F'
+            },
+            {
+              label: 'Withdrawals / Outflows (Lavender)',
+              data: withdrawalsData,
+              borderColor: '#B7A4E0',
+              backgroundColor: withdrawalsGrad,
+              borderWidth: 2.2,
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              pointBackgroundColor: '#B7A4E0',
+              pointBorderColor: '#B7A4E0'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#ECE3D4',
+              titleColor: '#17273C',
+              titleFont: { family: 'Manrope', weight: 'bold' },
+              bodyColor: '#17273C',
+              bodyFont: { family: 'IBM Plex Mono', size: 11 },
+              borderColor: 'rgba(23, 39, 60, 0.2)',
+              borderWidth: 1,
+              padding: 8,
+              displayColors: true,
+              callbacks: {
+                label: (ctx) => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}M`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(23, 39, 60, 0.08)' },
+              ticks: { color: '#51647B', font: { family: 'IBM Plex Mono', size: 9.5 } }
+            },
+            y: {
+              grid: { color: 'rgba(23, 39, 60, 0.08)' },
+              ticks: { 
+                color: '#51647B', 
+                font: { family: 'IBM Plex Mono', size: 9.5 },
+                callback: (val) => `$${val}M`
+              }
+            }
+          }
+        }
+      });
+
+      // 2. Institutional Horse-Race (inside #20334D Deep Navy Slate Container)
+      const benchmarkCtx = document.getElementById('benchmarkChart').getContext('2d');
+      const benchLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      const aegisFlowCurve = [150.0, 150.55, 151.12, 151.72, 152.35, 152.98, 153.65, 154.34, 155.05, 155.78, 156.42, 157.15];
+      const staticRuleCurve = [150.0, 150.38, 150.78, 151.20, 151.58, 151.92, 152.32, 152.70, 153.08, 153.35, 153.62, 154.65];
+      const naiveChaserCurve = [150.0, 150.72, 151.48, 152.30, 151.10, 149.20, 147.60, 148.90, 150.10, 148.30, 146.40, 147.20];
+      const cashBaselineCurve = [150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0];
+
+      benchmarkChartInstance = new Chart(benchmarkCtx, {
+        type: 'line',
+        data: {
+          labels: benchLabels,
+          datasets: [
+            {
+              label: 'AegisFlow Quant (+4.42%)',
+              data: aegisFlowCurve,
+              borderColor: '#447C6F',
+              borderWidth: 2.2,
+              pointRadius: 2.5,
+              pointBackgroundColor: '#447C6F',
+              tension: 0.2,
+            },
+            {
+              label: 'Static 20/30/30/20 (+3.1%)',
+              data: staticRuleCurve,
+              borderColor: '#C2962C',
+              borderWidth: 1.8,
+              pointRadius: 0,
+              tension: 0.2,
+            },
+            {
+              label: 'Naive Max-Yield Chaser',
+              data: naiveChaserCurve,
+              borderColor: '#B2583F',
+              borderWidth: 1.6,
+              borderDash: [3, 3],
+              pointRadius: 0,
+              tension: 0.25,
+            },
+            {
+              label: 'All-Cash Baseline ($0)',
+              data: cashBaselineCurve,
+              borderColor: '#879EB8',
+              borderWidth: 1.2,
+              pointRadius: 0,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#18273B',
+              titleColor: '#F5F2EB',
+              titleFont: { family: 'Manrope', weight: 'bold' },
+              bodyColor: '#A5B4C7',
+              bodyFont: { family: 'IBM Plex Mono', size: 11 },
+              borderColor: 'rgba(255, 255, 255, 0.15)',
+              borderWidth: 1,
+              callbacks: {
+                label: (ctx) => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}M`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.08)' },
+              ticks: { color: '#A5B4C7', font: { family: 'IBM Plex Mono', size: 9.5 } }
+            },
+            y: {
+              min: 145,
+              max: 160,
+              grid: { color: 'rgba(255, 255, 255, 0.08)' },
+              ticks: { 
+                color: '#A5B4C7', 
+                font: { family: 'IBM Plex Mono', size: 9.5 },
+                callback: (val) => `$${val}M`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      const playIcon = document.getElementById('playIcon');
+      const playText = document.getElementById('playText');
+      const btn = document.getElementById('btnPlayPause');
+
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause text-[9px] text-primaryNavy";
+        playText.innerText = "PAUSE";
+        btn.classList.add('bg-beige-inset');
+        playInterval = setInterval(stepForward, 1200 / playbackSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play text-[9px] text-primaryNavy";
+        playText.innerText = "PLAY";
+        btn.classList.remove('bg-beige-inset');
+        clearInterval(playInterval);
+      }
+    }
+
+    function setSpeed(multiplier) {
+      playbackSpeed = multiplier;
+      document.querySelectorAll('.speed-btn').forEach(btn => {
+        if (parseInt(btn.dataset.speed, 10) === multiplier) {
+          btn.classList.add('bg-beige-surface', 'text-primaryNavy', 'font-semibold');
+          btn.classList.remove('text-secondarySlate', 'font-medium');
+        } else {
+          btn.classList.remove('bg-beige-surface', 'text-primaryNavy', 'font-semibold');
+          btn.classList.add('text-secondarySlate', 'font-medium');
+        }
+      });
+      if (isPlaying) {
+        clearInterval(playInterval);
+        playInterval = setInterval(stepForward, 1200 / playbackSpeed);
+      }
+    }
+
+    function stepForward() {
+      currentIndex = (currentIndex + 1) % treasuryDataset.length;
+      const tick = treasuryDataset[currentIndex];
+      updateUI(tick);
+
+      if (intradayChartInstance) {
+        const start = Math.max(0, currentIndex - 18);
+        const slice = treasuryDataset.slice(start, start + 20);
+        intradayChartInstance.data.labels = slice.map(d => d.timestamp.split(' ')[1].substring(0, 5));
+        intradayChartInstance.data.datasets[0].data = slice.map(d => calculateP99Target(d) / 1e6);
+        intradayChartInstance.data.datasets[1].data = slice.map(d => d.deposits / 1e6);
+        intradayChartInstance.data.datasets[2].data = slice.map(d => d.withdrawals / 1e6);
+        intradayChartInstance.update('none');
+      }
+
+      document.getElementById('timelineSlider').value = Math.round((currentIndex / treasuryDataset.length) * 1000);
+      document.getElementById('sliderHourDisplay').innerText = `Hour ${currentIndex * 219} / 8,760 (${Math.round((currentIndex/treasuryDataset.length)*100)}% of Year)`;
+    }
+
+    function onSliderScrub(val) {
+      const idx = Math.floor((val / 1000) * (treasuryDataset.length - 1));
+      currentIndex = idx;
+      updateUI(treasuryDataset[currentIndex]);
+      document.getElementById('sliderHourDisplay').innerText = `Hour ${Math.round((val/1000)*8760)} / 8,760 (${(val/10).toFixed(1)}% of Year)`;
+    }
+
+    function jumpToScenario(key) {
+      if (key === 'payday') {
+        currentIndex = 5;
+        addLog("12:00:00", "SWEEP", "[SCENARIO] Payday surge active: +$24.1M/hr deposits flowing. Preparing Tier 1 Repo sweep.");
+      } else if (key === 'blackswan') {
+        currentIndex = 22;
+        addLog("17:00:00", "DEFICIT", "[SCENARIO] Black Swan Run triggered: -$32.5M outflow run. Dynamic P99 safety envelope stretching.");
+      } else if (key === 'crash') {
+        currentIndex = 30;
+        addLog("16:00:00", "HAIRCUT", "[SCENARIO] Equities plunge -28.8% (Index 3,643). Equity liquidation breaker activated.");
+      } else if (key === 'shock') {
+        currentIndex = 18;
+        addLog("02:00:00", "DEFICIT", "[SCENARIO] 3x Midnight Shock injected: -$18.2M withdrawal surge. Cushion absorbed without overdraft.");
+      }
+      updateUI(treasuryDataset[currentIndex]);
+    }
+
+    function resetSimulation() {
+      if (isPlaying) togglePlay();
+      currentIndex = 0;
+      tier0Bal = 13086813;
+      tier1Bal = 45000000;
+      tier2Bal = 56549800;
+      tier3Bal = 30000000;
+      cumulativeYield = 6420110;
+      totalHaircutsPaid = 0;
+      updateUI(treasuryDataset[0]);
+      initLogs();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initLogs();
+      initCharts();
+      updateUI(treasuryDataset[currentIndex]);
+    });
+  </script>
+</body></html>

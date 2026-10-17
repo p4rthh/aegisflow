@@ -62,7 +62,7 @@ async def websocket_replay(websocket: WebSocket):
                         idx = int(cmd_data.get("index", 0))
                         current_index = max(0, min(total_hours - 1, idx))
                         # Emit instant preview tick upon seek
-                        tick = build_tick_payload(current_index, df, ticks_cache, strategies)
+                        tick = build_tick_payload(current_index, df, ticks_cache, strategies, preds_df=app_state.preds_df)
                         await websocket.send_text(json.dumps({"type": "tick", "payload": tick}))
 
                     elif cmd == "speed":
@@ -96,7 +96,7 @@ async def websocket_replay(websocket: WebSocket):
 
             # Frame rate cap: at most 30 socket packets per second
             if speed <= 30:
-                tick = build_tick_payload(current_index, df, ticks_cache, strategies)
+                tick = build_tick_payload(current_index, df, ticks_cache, strategies, preds_df=app_state.preds_df)
                 await websocket.send_text(json.dumps({"type": "tick", "payload": tick}))
                 current_index += 1
                 await asyncio.sleep(1.0 / speed)
@@ -106,7 +106,7 @@ async def websocket_replay(websocket: WebSocket):
                 batch_size = max(2, int(round(speed / 30.0)))
                 batch_end = min(total_hours, current_index + batch_size)
                 batch_ticks = [
-                    build_tick_payload(i, df, ticks_cache, strategies)
+                    build_tick_payload(i, df, ticks_cache, strategies, preds_df=app_state.preds_df)
                     for i in range(current_index, batch_end)
                 ]
                 await websocket.send_text(json.dumps({

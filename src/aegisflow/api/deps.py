@@ -22,6 +22,7 @@ class AppState:
         self.frontier_data: List[Dict[str, Any]] = []
         self.sensitivity_data: Dict[str, Any] = {}
         self.ticks_cache: Dict[str, pd.DataFrame] = {}
+        self.preds_df: Optional[pd.DataFrame] = None
         self.presets: Dict[str, Any] = {}
         self.ready: bool = False
 
@@ -68,6 +69,14 @@ class AppState:
             t_file = art_dir / f"ticks_{strat}.parquet"
             if t_file.exists():
                 self.ticks_cache[strat] = pd.read_parquet(t_file)
+
+        # Predictions parquet (latest)
+        preds_files = sorted(list(art_dir.glob("hourly_preds_*.parquet")), key=lambda p: p.stat().st_mtime, reverse=True)
+        if preds_files:
+            try:
+                self.preds_df = pd.read_parquet(preds_files[0])
+            except Exception:
+                self.preds_df = None
 
         # Set ready only if essential artifacts loaded successfully
         self.ready = bool(

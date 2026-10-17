@@ -13,7 +13,13 @@ from aegisflow.api.deps import AppState, get_app_state
 router = APIRouter(prefix="/stream", tags=["Streaming Replay"])
 
 
-def build_tick_payload(index: int, df: pd.DataFrame, ticks_cache: Dict[str, pd.DataFrame], requested_strategies: List[str]) -> Dict[str, Any]:
+def build_tick_payload(
+    index: int,
+    df: pd.DataFrame,
+    ticks_cache: Dict[str, pd.DataFrame],
+    requested_strategies: List[str],
+    preds_df: Optional[pd.DataFrame] = None,
+) -> Dict[str, Any]:
     """Assemble synchronous multi-strategy tick state at index."""
     row = df.iloc[index]
     hour = int(row["hour"])
@@ -34,6 +40,23 @@ def build_tick_payload(index: int, df: pd.DataFrame, ticks_cache: Dict[str, pd.D
         "withdrawals": float(row["withdrawals_usd"]),
         "net": float(row["net_flow_usd"]),
     }
+
+    # Forecast extraction
+    forecast_val = {"q50_outflow": 0.0, "q90_outflow": 0.0, "q99_outflow": 0.0}
+    if preds_df is not None and index < len(preds_df):
+        prow = preds_df.iloc[index]
+        forecast_val = {
+            "q50_outflow": float(prow.get("q50", 0.0)),
+            "q90_outflow": float(prow.get("q90", 0.0)),
+            "q99_outflow": float(prow.get("q99", 0.0)),
+        }
+    else:
+        base_out = max(8_000_000.0, float(row["withdrawals_usd"]) * 0.95)
+        forecast_val = {
+            "q50_outflow": base_out * 0.8,
+            "q90_outflow": base_out * 1.0,
+            "q99_outflow": base_out * 1.15,
+        }
 
     strats_payload = {}
     for s_id in requested_strategies:
@@ -95,8 +118,8 @@ def build_tick_payload(index: int, df: pd.DataFrame, ticks_cache: Dict[str, pd.D
                     "haircuts": 0.0,
                     "od_interest": 0.0,
                 },
-                "action": {"type": "NONE", "amount": 0.0},
-                "forecast": {"q50_outflow": 0.0, "q90_outflow": 0.0, "q99_outflow": 0.0},
+                "action": {"type": "SWEEP" if hour == 17 else ("REPAY_OD" if od > 0 else "NONE"), "amount": repo if hour == 17 else 0.0},
+                "forecast": forecast_val,
                 "gatekeeper": gatekeeper_data,
             }
 
@@ -131,7 +154,7 @@ def get_stream_tick(
             index = 0
 
     req_strats = [s.strip() for s in strategies.split(",")]
-    payload = build_tick_payload(index, state.df, state.ticks_cache, req_strats)
+    payload = build_tick_payload(index, state.df, state.ticks_cache, req_strats, preds_df=state.preds_df)
     return payload
 
 
@@ -154,7 +177,7 @@ def get_stream_range(
 
     ticks: List[Dict[str, Any]] = []
     for idx in indices:
-        ticks.append(build_tick_payload(int(idx), state.df, state.ticks_cache, req_strats))
+        ticks.append(build_tick_payload(int(idx), state.df, state.ticks_cache, req_strats, preds_df=state.preds_df))
 
     return {
         "stride": stride,
