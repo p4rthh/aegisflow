@@ -181,8 +181,9 @@ class AegisFlow(BaseStrategy):
             pool_critical_floor = self.ladder.compute_need_usd(36.0, self.d_hat)
             if free_cash < pool_critical_floor and current_bond_mv > 0.0:
                 deficit_usd = pool_req - free_cash
-                gross_to_sell = min(current_bond_mv, deficit_usd / (1.0 - DEFAULT_TIER2_HAIRCUT))
-                proceeds, fee = sell_bond(state, gross_to_sell, bond_price, haircut=DEFAULT_TIER2_HAIRCUT)
+                h2 = self.config.frictions.tier2_bond_liquidation_haircut
+                gross_to_sell = min(current_bond_mv, deficit_usd / (1.0 - h2))
+                proceeds, fee = sell_bond(state, gross_to_sell, bond_price, haircut=h2)
                 self.logger.log(
                     timestamp=str(row["timestamp"]),
                     index=t,

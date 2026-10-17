@@ -62,6 +62,7 @@ class NightPathEngine:
                     sampled_residuals[:, k] = innovations[:, k]
                 else:
                     sampled_residuals[:, k] = 0.695 * sampled_residuals[:, k - 1] + innovations[:, k]
+            sampled_residuals *= conformal_scale
 
         # Net flow = -(outflow) = -(mean_outflow + residual)
         sim_hourly_net_flows = -(mean_forecast_15 + sampled_residuals)

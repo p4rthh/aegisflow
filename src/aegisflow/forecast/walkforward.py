@@ -19,18 +19,26 @@ def get_walkforward_cache_path(
     burnin_days: int,
     retrain_freq_hours: int,
 ) -> Path:
-    """Compute parameter-fingerprinted cache path to prevent collisions."""
+    """Compute content- and parameter-fingerprinted cache path to prevent collisions."""
     cache_file = Path(cache_path)
     n_rows = len(df)
     t0 = str(df["timestamp"].iloc[0]) if "timestamp" in df and len(df) > 0 else "0"
     t1 = str(df["timestamp"].iloc[-1]) if "timestamp" in df and len(df) > 0 else str(n_rows)
-    sig = f"{n_rows}_{t0}_{t1}_{burnin_days}_{retrain_freq_hours}"
+
+    # Content hash of model input flow columns
+    col_bytes = b""
+    for col in ["deposits_usd", "withdrawals_usd", "outflow"]:
+        if col in df:
+            col_bytes += df[col].to_numpy().tobytes()
+    content_hash = hashlib.sha256(col_bytes).hexdigest()[:8] if col_bytes else "empty"
+
+    sig = f"{n_rows}_{t0}_{t1}_{burnin_days}_{retrain_freq_hours}_{content_hash}"
     h = hashlib.sha256(sig.encode("utf-8")).hexdigest()[:8]
 
     if cache_file.name == "hourly_preds.parquet":
-        if n_rows == 8760 and burnin_days == 21 and retrain_freq_hours == 168 and cache_file.exists():
-            return cache_file
         return cache_file.parent / f"hourly_preds_{h}.parquet"
+    if not cache_file.stem.endswith(h):
+        return cache_file.parent / f"{cache_file.stem}_{h}{cache_file.suffix}"
     return cache_file
 
 

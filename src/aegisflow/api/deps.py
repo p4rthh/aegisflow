@@ -27,17 +27,18 @@ class AppState:
 
     def load_all(self):
         """Load dataset, config, presets, and cached artifacts into memory."""
+        project_root = Path(__file__).resolve().parent.parent.parent.parent
         self.df = load_dataset()
         self.config = get_default_config()
 
         # Load presets
-        presets_path = Path("configs/stress_presets.yaml")
+        presets_path = project_root / "configs" / "stress_presets.yaml"
         if presets_path.exists():
             import yaml
             with open(presets_path, "r") as f:
                 self.presets = yaml.safe_load(f).get("presets", {})
 
-        art_dir = Path("artifacts")
+        art_dir = project_root / "artifacts"
         # Backtest comparison
         bt_file = art_dir / "backtest_3000000000.json"
         if bt_file.exists():
@@ -68,7 +69,12 @@ class AppState:
             if t_file.exists():
                 self.ticks_cache[strat] = pd.read_parquet(t_file)
 
-        self.ready = True
+        # Set ready only if essential artifacts loaded successfully
+        self.ready = bool(
+            self.df is not None
+            and bool(self.backtest_data)
+            and len(self.ticks_cache) == 4
+        )
 
 
 # Global singleton instance

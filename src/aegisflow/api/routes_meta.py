@@ -98,18 +98,18 @@ def get_theorems(state: AppState = Depends(get_app_state)):
                 "bond_liquidation_hours": h_star_bond,
                 "equity_liquidation_hours": h_star_equity,
             },
-            "insight": "For any transient overnight shortfall that cures at 08:00, emergency overdraft is 24.4x cheaper than cracking Tier 1 Repo early.",
+            "insight": f"For any transient overnight shortfall that cures at 08:00, emergency overdraft is {ratio:.1f}x cheaper than cracking Tier 1 Repo early.",
         },
         "theorem_2_equity_horizon": {
             "title": "Permanent Capital Horizon for Equities",
             "breakeven_horizon_years": tau_e_years,
-            "insight": f"Due to 15.0% fire-sale slippage, equities require an uninterrupted {tau_e_years:.1f}-year holding period to outperform bonds. With a $2.5B/yr net drain, optimal equity allocation is strictly 0 at $3B AUM.",
+            "insight": f"Due to {h3 * 100:.1f}% fire-sale slippage, equities require an uninterrupted {tau_e_years:.1f}-year holding period to outperform bonds. With a $2.5B/yr net drain, optimal equity allocation is strictly 0 at $3B AUM.",
         },
         "theorem_3_bond_need_time": {
             "title": "Need-Time Ladder for Sovereign Bonds",
             "breakeven_horizon_hours": tau_b_hours,
             "breakeven_horizon_months": tau_b_hours / (24.0 * 30.5),
             "effective_liquid_pool_yield_pct": liquid_yield * 100.0,
-            "insight": f"Bonds amortize their 2.0% market haircut only for capital not needed for {tau_b_hours/24.0/30.5:.1f} months.",
+            "insight": f"Bonds amortize their {h2 * 100:.1f}% market haircut only for capital not needed for {tau_b_hours/24.0/30.5:.1f} months.",
         },
     }

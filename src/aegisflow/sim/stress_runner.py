@@ -143,7 +143,7 @@ def run_stress_test(
     return {
         "run_id": run_id,
         "shocks_applied": shocks,
-        "baseline_run_id": f"bt_{int(aum0)}_cost_optimal",
+        "baseline_run_id": f"bt_{int(aum0)}_{config.risk_mode.value}",
         "results": results,
         "events": events[:20],  # sample key events
         "equity_curves": curves,

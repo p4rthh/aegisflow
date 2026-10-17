@@ -102,7 +102,8 @@ async def websocket_replay(websocket: WebSocket):
                 await asyncio.sleep(1.0 / speed)
             else:
                 # Batch ticks to keep message frequency <= 30/s
-                batch_size = max(2, int(speed / 30.0))
+                t_frame_start = asyncio.get_running_loop().time()
+                batch_size = max(2, int(round(speed / 30.0)))
                 batch_end = min(total_hours, current_index + batch_size)
                 batch_ticks = [
                     build_tick_payload(i, df, ticks_cache, strategies)
@@ -116,7 +117,10 @@ async def websocket_replay(websocket: WebSocket):
                     "payload": batch_ticks[-1],
                 }))
                 current_index = batch_end
-                await asyncio.sleep(0.033)
+                target_duration = len(batch_ticks) / speed
+                elapsed = asyncio.get_running_loop().time() - t_frame_start
+                sleep_time = max(0.001, target_duration - elapsed)
+                await asyncio.sleep(sleep_time)
 
     except WebSocketDisconnect:
         pass
