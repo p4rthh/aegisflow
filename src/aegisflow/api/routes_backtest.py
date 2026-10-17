@@ -21,8 +21,8 @@ def get_backtest_compare(
 ):
     """Retrieve full 4-strategy comparative performance, KPIs, and equity curves."""
     if state.backtest_data:
-        cached_aum = state.backtest_data.get("config", {}).get("aum0")
-        cached_mode = state.backtest_data.get("config", {}).get("risk_mode")
+        cached_aum = state.backtest_data.get("aum0") or state.backtest_data.get("config", {}).get("aum0")
+        cached_mode = state.backtest_data.get("risk_mode") or state.backtest_data.get("config", {}).get("risk_mode")
         if (cached_aum is None or abs(float(cached_aum) - aum0) < 1.0) and (
             cached_mode is None or cached_mode == risk_mode.value
         ):

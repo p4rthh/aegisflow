@@ -22,17 +22,12 @@ def get_walkforward_cache_path(
     """Compute content- and parameter-fingerprinted cache path to prevent collisions."""
     cache_file = Path(cache_path)
     n_rows = len(df)
-    t0 = str(df["timestamp"].iloc[0]) if "timestamp" in df and len(df) > 0 else "0"
-    t1 = str(df["timestamp"].iloc[-1]) if "timestamp" in df and len(df) > 0 else str(n_rows)
+    ts_bytes = pd.to_datetime(df["timestamp"]).astype("int64").to_numpy().tobytes() if "timestamp" in df and n_rows > 0 else b""
+    input_cols = [c for c in ["deposits_usd", "withdrawals_usd", "outflow", "net_flow_usd", "tier1_repo_rate_apy", "tier2_bond_yield_pct", "tier3_stock_index_price"] if c in df]
+    data_bytes = ts_bytes + b"".join(df[c].to_numpy().tobytes() for c in input_cols)
+    content_hash = hashlib.sha256(data_bytes).hexdigest()[:12] if data_bytes else "empty"
 
-    # Content hash of model input flow columns
-    col_bytes = b""
-    for col in ["deposits_usd", "withdrawals_usd", "outflow"]:
-        if col in df:
-            col_bytes += df[col].to_numpy().tobytes()
-    content_hash = hashlib.sha256(col_bytes).hexdigest()[:8] if col_bytes else "empty"
-
-    sig = f"{n_rows}_{t0}_{t1}_{burnin_days}_{retrain_freq_hours}_{content_hash}"
+    sig = f"{n_rows}_{burnin_days}_{retrain_freq_hours}_{content_hash}"
     h = hashlib.sha256(sig.encode("utf-8")).hexdigest()[:8]
 
     if cache_file.name == "hourly_preds.parquet":
@@ -40,6 +35,39 @@ def get_walkforward_cache_path(
     if not cache_file.stem.endswith(h):
         return cache_file.parent / f"{cache_file.stem}_{h}{cache_file.suffix}"
     return cache_file
+
+
+def compute_walkforward_report(preds_df: pd.DataFrame, burnin_hours: int) -> Dict[str, Any]:
+    """Compute the 7-metric performance report on post-burnin predictions."""
+    n_hours = len(preds_df)
+    if n_hours <= burnin_hours:
+        return {}
+    eval_mask = np.arange(n_hours) >= burnin_hours
+    y = preds_df["actual_outflow"].to_numpy(dtype=np.float32)
+    y_eval = y[eval_mask]
+    q50_eval = preds_df["q50"].to_numpy(dtype=np.float32)[eval_mask]
+    q90_eval = preds_df["q90"].to_numpy(dtype=np.float32)[eval_mask]
+    q99_eval = preds_df["q99"].to_numpy(dtype=np.float32)[eval_mask]
+
+    # Evaluate seasonal naive strictly on rows with t >= 168 (no wrapped future observations)
+    naive_mask = np.arange(n_hours) >= max(burnin_hours, 168)
+    if np.any(naive_mask):
+        y_naive = y[naive_mask]
+        indices = np.where(naive_mask)[0]
+        naive_pred = y[indices - 168]
+        loss_naive = pinball_loss(y_naive, naive_pred, 0.5)
+    else:
+        loss_naive = pinball_loss(y_eval, q50_eval, 0.5)
+
+    return {
+        "pinball_loss_q50": pinball_loss(y_eval, q50_eval, 0.5),
+        "pinball_loss_q90": pinball_loss(y_eval, q90_eval, 0.9),
+        "pinball_loss_q99": pinball_loss(y_eval, q99_eval, 0.99),
+        "pinball_loss_naive_q50": loss_naive,
+        "empirical_coverage_q50": float(np.mean(y_eval <= q50_eval)),
+        "empirical_coverage_q90": float(np.mean(y_eval <= q90_eval)),
+        "empirical_coverage_q99": float(np.mean(y_eval <= q99_eval)),
+    }
 
 
 def run_walkforward_forecast(
@@ -53,23 +81,25 @@ def run_walkforward_forecast(
     Returns (predictions_df, performance_report).
     """
     cache_file = get_walkforward_cache_path(cache_path, df, burnin_days, retrain_freq_hours)
+    burnin_hours = burnin_days * 24
+
     if cache_file.exists():
         preds_df = pd.read_parquet(cache_file)
-        return preds_df, {}
+        report = compute_walkforward_report(preds_df, burnin_hours)
+        return preds_df, report
 
     X = build_feature_dataframe(df).to_numpy(dtype=np.float32)
     y = df["outflow"].to_numpy(dtype=np.float32)
     n_hours = len(df)
-
-    burnin_hours = burnin_days * 24
+    burnin_limit = min(n_hours, burnin_hours)
 
     pred_q50 = np.zeros(n_hours, dtype=np.float32)
     pred_q90 = np.zeros(n_hours, dtype=np.float32)
     pred_q99 = np.zeros(n_hours, dtype=np.float32)
     pred_mean = np.zeros(n_hours, dtype=np.float32)
 
-    # 1. Burn-in period (days 0..21): use expanding empirical quantiles / seasonal naive
-    for t in range(burnin_hours):
+    # 1. Burn-in period (bounded by available rows)
+    for t in range(burnin_limit):
         if t < 24:
             # First day: use historical initial priors
             pred_q50[t] = 0.0
@@ -114,24 +144,5 @@ def run_walkforward_forecast(
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     preds_df.to_parquet(cache_file, index=False)
 
-    # Evaluate post-burnin metrics
-    eval_mask = np.arange(n_hours) >= burnin_hours
-    y_eval = y[eval_mask]
-    q50_eval = pred_q50[eval_mask]
-    q90_eval = pred_q90[eval_mask]
-    q99_eval = pred_q99[eval_mask]
-
-    # Seasonal naive baseline: same-hour-last-week (lag 168)
-    naive_pred = np.roll(y, 168)[eval_mask]
-
-    report = {
-        "pinball_loss_q50": pinball_loss(y_eval, q50_eval, 0.5),
-        "pinball_loss_q90": pinball_loss(y_eval, q90_eval, 0.9),
-        "pinball_loss_q99": pinball_loss(y_eval, q99_eval, 0.99),
-        "pinball_loss_naive_q50": pinball_loss(y_eval, naive_pred, 0.5),
-        "empirical_coverage_q50": float(np.mean(y_eval <= q50_eval)),
-        "empirical_coverage_q90": float(np.mean(y_eval <= q90_eval)),
-        "empirical_coverage_q99": float(np.mean(y_eval <= q99_eval)),
-    }
-
+    report = compute_walkforward_report(preds_df, burnin_hours)
     return preds_df, report

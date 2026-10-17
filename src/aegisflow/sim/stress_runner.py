@@ -54,10 +54,11 @@ def run_stress_test(
         try:
             with open(baseline_json_path, "r") as f:
                 unshocked_payload = json.load(f)
-                cached_cfg = unshocked_payload.get("config", {})
+                cached_mode = unshocked_payload.get("risk_mode") or unshocked_payload.get("config", {}).get("risk_mode")
+                cached_seed = unshocked_payload.get("seed") or unshocked_payload.get("config", {}).get("seed", 42)
                 if (
-                    cached_cfg.get("risk_mode") == config.risk_mode.value
-                    and cached_cfg.get("seed") == config.seed
+                    cached_mode == config.risk_mode.value
+                    and cached_seed == config.seed
                 ):
                     unshocked_kpis = unshocked_payload.get("strategies", {})
         except Exception:

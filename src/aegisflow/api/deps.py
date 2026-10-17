@@ -20,7 +20,7 @@ class AppState:
         self.backtest_data: Dict[str, Any] = {}
         self.ablations_data: List[Dict[str, Any]] = []
         self.frontier_data: List[Dict[str, Any]] = []
-        self.sensitivity_data: Dict[str, Any] = []
+        self.sensitivity_data: Dict[str, Any] = {}
         self.ticks_cache: Dict[str, pd.DataFrame] = {}
         self.presets: Dict[str, Any] = {}
         self.ready: bool = False
