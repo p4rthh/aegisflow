@@ -3,7 +3,7 @@ services:
     name: aegisflow
     env: docker
     dockerfilePath: ./Dockerfile
-    plan: standard
+    plan: free
     healthCheckPath: /api/health
     envVars:
       - key: PORT
