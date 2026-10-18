@@ -1,12 +1,51 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# Environments & Virtual Envs
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.local
+.env.*.local
+
+# Testing & Coverage
 .pytest_cache/
-*.Zone.Identifier
-*.Zone.Identifier*
-artifacts/*.parquet
-data/processed/
+.coverage
+htmlcov/
+
+# Build & Packaging
 build/
 dist/
 *.egg-info/
+*.egg
+
+# Data Caches & Artifacts
+artifacts/*.parquet
+data/processed/
+
+# Presentation Media, Video & Launch Trailer
+launch_trailer.mp4
+*.mp4
+video_project/
+assets/*.jpg
+assets/*.jpeg
+assets/*.png
+assets/*.webp
+slide_*.png
+
+# OS & WSL Metadata Artifacts
+*.Zone.Identifier
+*.Zone.Identifier*
+.DS_Store
+Thumbs.db
+
+# IDE & Editor Directories
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,12 @@
+services:
+  aegisflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aegisflow-app
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

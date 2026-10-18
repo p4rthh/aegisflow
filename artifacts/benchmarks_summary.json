@@ -1,38 +1,102 @@
 {
-  "out_of_sample_split_70_30": {
-    "train_hours": 6132,
-    "test_hours": 2628,
-    "train_period": "2026-01-01 00:00:00 to 2026-09-13 11:00:00",
-    "test_period": "2026-09-13 12:00:00 to 2026-12-31 23:00:00",
-    "r2_score": 0.7208936391847173,
-    "mae_model_usd": 992706.8179135696,
-    "mae_naive_usd": 1967443.625,
-    "mae_improvement_pct": 49.54331573726441,
-    "pinball_loss_q50": 511755.303846393,
-    "pinball_loss_naive_q50": 983721.8125,
-    "pinball_reduction_pct": 47.97763988318669,
-    "pinball_loss_q90": 285244.9759125956,
-    "pinball_loss_q99": 91631.72013091674,
-    "empirical_coverage_q50": 0.484779299847793,
-    "empirical_coverage_q90": 0.8953576864535768,
-    "empirical_coverage_q99": 0.989345509893455,
-    "coverage_error_q50": 0.015220700152207,
-    "coverage_error_q90": 0.0046423135464231935,
-    "coverage_error_q99": 0.0006544901065449471
+  "aegisflow": {
+    "net_pnl": 61472257.56460762,
+    "net_apy_pct": 3.432104554795454,
+    "max_drawdown_usd": 30562863.681045055,
+    "max_drawdown_pct_aum0": 1.0187621227015018,
+    "overdraft": {
+      "episodes": 221,
+      "draws": 1094,
+      "volume_usd": 1520789607.4525263,
+      "peak_usd": 79305469.30252747,
+      "hours": 1768,
+      "interest_usd": 151282.07647964996
+    },
+    "haircuts": {
+      "total": 12129912.868048692,
+      "tier1": 0.0,
+      "tier2": 12129912.868048692,
+      "tier3": 0.0
+    },
+    "capital_efficiency_ratio": 0.7341581457143389,
+    "deployment_ratio": 0.8396408076926308,
+    "friction_drag": 0.1874724193501837,
+    "calmar": 2.011338276613537,
+    "sharpe": 1.431437604754829
   },
-  "monte_carlo_chaos_benchmark": {
-    "n_trials": 20,
-    "mean_af_pnl": -1487644118.1784356,
-    "min_af_pnl": -2337953159.2201767,
-    "max_af_pnl": -536932682.0092812,
-    "mean_b2_pnl": -1776481295.0603497,
-    "mean_alpha_vs_b2": 288837176.8819143,
-    "min_alpha_vs_b2": 200929078.9403,
-    "win_rate_vs_b2": 100.0,
-    "mean_af_haircuts": 0.0,
-    "mean_b2_haircuts": 88063878.81431893,
-    "haircut_reduction_pct": 100.0,
-    "mean_af_od_hours": 7961.8,
-    "mean_b2_od_hours": 7848.7
+  "baseline0_cash": {
+    "net_pnl": 4.172325134277344e-07,
+    "net_apy_pct": 2.3294827072831333e-14,
+    "max_drawdown_usd": 1.4781951904296875e-05,
+    "max_drawdown_pct_aum0": 4.927317301432292e-13,
+    "overdraft": {
+      "episodes": 0,
+      "draws": 0,
+      "volume_usd": 0.0,
+      "peak_usd": 0.0,
+      "hours": 0,
+      "interest_usd": 0.0
+    },
+    "haircuts": {
+      "total": 0.0,
+      "tier1": 0.0,
+      "tier2": 0.0,
+      "tier3": 0.0
+    },
+    "capital_efficiency_ratio": 4.982973792167962e-15,
+    "deployment_ratio": 0.0,
+    "friction_drag": 0.0,
+    "calmar": 0.0,
+    "sharpe": 0.02707502672938888
+  },
+  "baseline1_greedy": {
+    "net_pnl": -1364160830.1562614,
+    "net_apy_pct": -76.16350503692027,
+    "max_drawdown_usd": 1538357728.8618555,
+    "max_drawdown_pct_aum0": 51.278590962061855,
+    "overdraft": {
+      "episodes": 2,
+      "draws": 1441,
+      "volume_usd": 3108876864.3102074,
+      "peak_usd": 951793001.695294,
+      "hours": 2793,
+      "interest_usd": 17598967.25692228
+    },
+    "haircuts": {
+      "total": 1164886876.33408,
+      "tier1": 0.0,
+      "tier2": 0.0,
+      "tier3": 1164886876.33408
+    },
+    "capital_efficiency_ratio": -16.29206125171282,
+    "deployment_ratio": 0.6796114002776569,
+    "friction_drag": 0.0,
+    "calmar": -0.8867643751271868,
+    "sharpe": -3.509736695429847
+  },
+  "baseline2_static": {
+    "net_pnl": -203336347.2575323,
+    "net_apy_pct": -11.352626879606307,
+    "max_drawdown_usd": 263450644.50461525,
+    "max_drawdown_pct_aum0": 8.781688150153842,
+    "overdraft": {
+      "episodes": 0,
+      "draws": 0,
+      "volume_usd": 0.0,
+      "peak_usd": 0.0,
+      "hours": 0,
+      "interest_usd": 0.0
+    },
+    "haircuts": {
+      "total": 62506507.649731025,
+      "tier1": 0.0,
+      "tier2": 26264591.433759023,
+      "tier3": 36241916.21597203
+    },
+    "capital_efficiency_ratio": -2.428429369167413,
+    "deployment_ratio": 0.8492128180633571,
+    "friction_drag": 1.6099166097305346,
+    "calmar": -0.7718195096462183,
+    "sharpe": -1.399785147824407
   }
 }

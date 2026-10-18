@@ -1,9 +1,9 @@
 {
-  "pinball_loss_q50": 534366.6875,
-  "pinball_loss_q90": 289660.125,
-  "pinball_loss_q99": 89683.921875,
+  "pinball_loss_q50": 525380.0,
+  "pinball_loss_q90": 293201.09375,
+  "pinball_loss_q99": 90448.8359375,
   "pinball_loss_naive_q50": 986465.0,
-  "empirical_coverage_q50": 0.49382267441860467,
-  "empirical_coverage_q90": 0.8718507751937985,
-  "empirical_coverage_q99": 0.9800145348837209
+  "empirical_coverage_q50": 0.5033914728682171,
+  "empirical_coverage_q90": 0.8913517441860465,
+  "empirical_coverage_q99": 0.985343992248062
 }

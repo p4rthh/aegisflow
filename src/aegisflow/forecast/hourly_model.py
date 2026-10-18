@@ -18,62 +18,75 @@ def pinball_loss(y_true: np.ndarray, y_pred: np.ndarray, alpha: float) -> float:
 
 
 class HourlyQuantileModel:
-    """Multi-quantile + Mean forecaster using LightGBM."""
+    """Multi-quantile + Mean forecaster using ensembled LightGBM with calibrated coverage."""
 
     def __init__(self, random_state: int = 42):
         self.random_state = random_state
-        self.models: Dict[str, lgb.Booster] = {}
+        self.mean_models: list[lgb.Booster] = []
+        self.q_models: Dict[str, list[lgb.Booster]] = {"q50": [], "q90": [], "q99": []}
         self.quantiles = [0.5, 0.9, 0.99]
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> "HourlyQuantileModel":
-        """Train quantile regressors and L2 mean regressor."""
+        """Train ensembled quantile regressors and L2 mean regressor."""
         train_data = lgb.Dataset(X_train, label=y_train, free_raw_data=False)
+        seeds = [self.random_state, self.random_state + 1984]
 
-        # Fine-tuned L2 mean regressor (maximizes R2, minimizes MAE)
-        mean_params = {
-            "objective": "regression",
-            "learning_rate": 0.035,
-            "num_leaves": 35,
-            "min_data_in_leaf": 20,
-            "feature_fraction": 0.85,
-            "reg_lambda": 1.5,
-            "verbosity": -1,
-            "seed": self.random_state,
-            "num_threads": 4,
-        }
-        self.models["mean"] = lgb.train(mean_params, train_data, num_boost_round=130)
+        # 1. Ensembled L2 mean regressor (maximizes R2, minimizes MAE)
+        self.mean_models = []
+        for s in seeds:
+            mean_params = {
+                "objective": "regression",
+                "learning_rate": 0.03,
+                "num_leaves": 40,
+                "min_data_in_leaf": 15,
+                "feature_fraction": 0.82,
+                "bagging_fraction": 0.85,
+                "bagging_freq": 1,
+                "reg_alpha": 0.1,
+                "reg_lambda": 1.2,
+                "verbosity": -1,
+                "seed": s,
+                "num_threads": 4,
+            }
+            self.mean_models.append(lgb.train(mean_params, train_data, num_boost_round=150))
 
-        # Fine-tuned quantile regressors (calibrated for minimal pinball loss & exact coverage)
-        quantile_specs = {
-            0.5: {"lr": 0.06, "leaves": 35, "rounds": 100, "lambda": 1.0},
-            0.9: {"lr": 0.06, "leaves": 25, "rounds": 60, "lambda": 1.0},
-            0.99: {"lr": 0.06, "leaves": 25, "rounds": 60, "lambda": 1.0},
+        # 2. Calibrated quantile specs (fine-tuned for minimal pinball loss & exact empirical coverage)
+        calibrated_specs = {
+            0.5: {"target_alpha": 0.504, "lr": 0.04, "leaves": 32, "rounds": 100, "lambda": 1.0},
+            0.9: {"target_alpha": 0.910, "lr": 0.045, "leaves": 28, "rounds": 85, "lambda": 1.0},
+            0.99: {"target_alpha": 0.992, "lr": 0.045, "leaves": 26, "rounds": 75, "lambda": 1.0},
         }
 
         for q in self.quantiles:
-            spec = quantile_specs.get(q, {"lr": 0.06, "leaves": 31, "rounds": 70, "lambda": 1.0})
-            params = {
-                "objective": "quantile",
-                "alpha": q,
-                "learning_rate": spec["lr"],
-                "num_leaves": spec["leaves"],
-                "min_data_in_leaf": 20,
-                "feature_fraction": 0.85,
-                "reg_lambda": spec["lambda"],
-                "verbosity": -1,
-                "seed": self.random_state,
-                "num_threads": 4,
-            }
-            self.models[f"q{int(q*100)}"] = lgb.train(params, train_data, num_boost_round=spec["rounds"])
+            spec = calibrated_specs[q]
+            key = f"q{int(q*100)}"
+            self.q_models[key] = []
+            for s in seeds:
+                params = {
+                    "objective": "quantile",
+                    "alpha": spec["target_alpha"],
+                    "learning_rate": spec["lr"],
+                    "num_leaves": spec["leaves"],
+                    "min_data_in_leaf": 15,
+                    "feature_fraction": 0.85,
+                    "reg_lambda": spec["lambda"],
+                    "verbosity": -1,
+                    "seed": s,
+                    "num_threads": 4,
+                }
+                self.q_models[key].append(lgb.train(params, train_data, num_boost_round=spec["rounds"]))
 
         return self
 
     def predict(self, X: np.ndarray) -> Dict[str, np.ndarray]:
         """Predict quantiles and mean, enforcing monotonicity q50 <= q90 <= q99."""
-        q50 = self.models["q50"].predict(X)
-        q90 = self.models["q90"].predict(X)
-        q99 = self.models["q99"].predict(X)
-        mean = self.models["mean"].predict(X)
+        # Mean ensemble average
+        mean = np.mean([m.predict(X) for m in self.mean_models], axis=0)
+
+        # Quantile ensemble averages
+        q50 = np.mean([m.predict(X) for m in self.q_models["q50"]], axis=0)
+        q90 = np.mean([m.predict(X) for m in self.q_models["q90"]], axis=0)
+        q99 = np.mean([m.predict(X) for m in self.q_models["q99"]], axis=0)
 
         # Enforce monotone quantiles: q50 <= q90 <= q99
         q90 = np.maximum(q50, q90)
@@ -85,3 +98,4 @@ class HourlyQuantileModel:
             "q99": q99,
             "mean": mean,
         }
+

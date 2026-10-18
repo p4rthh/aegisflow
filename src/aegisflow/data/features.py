@@ -39,6 +39,12 @@ FEATURE_NAMES: List[str] = [
     "flow_diff_1", "flow_accel", "flow_diff_24", "flow_diff_168",
     "dep_with_ratio_24h",
     "ewma_outflow_24h",
+    # Interaction & Volatility Envelopes
+    "is_weekend",
+    "payday_hour_sin", "payday_hour_cos",
+    "weekend_hour_sin", "weekend_hour_cos",
+    "roll_min_24h", "roll_max_24h", "roll_range_24h",
+    "net_momentum_1",
 ]
 
 
@@ -144,4 +150,20 @@ def build_feature_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     feats["dep_with_ratio_24h"] = np.clip(dep_with_ratio, 0.1, 10.0)
     feats["ewma_outflow_24h"] = lag1.ewm(span=24, min_periods=1).mean()
 
+    # 7. Causal interaction terms & volatility envelope
+    is_weekend = np.isin(dow, [5, 6]).astype(np.float64)
+    feats["is_weekend"] = is_weekend
+    feats["payday_hour_sin"] = feats["is_payday"] * feats["hour_sin"]
+    feats["payday_hour_cos"] = feats["is_payday"] * feats["hour_cos"]
+    feats["weekend_hour_sin"] = is_weekend * feats["hour_sin"]
+    feats["weekend_hour_cos"] = is_weekend * feats["hour_cos"]
+
+    roll_min_24 = lag1.rolling(24, min_periods=1).min()
+    roll_max_24 = lag1.rolling(24, min_periods=1).max()
+    feats["roll_min_24h"] = roll_min_24
+    feats["roll_max_24h"] = roll_max_24
+    feats["roll_range_24h"] = roll_max_24 - roll_min_24
+    feats["net_momentum_1"] = lag_dep_1 - lag_with_1
+
     return feats[FEATURE_NAMES]
+
