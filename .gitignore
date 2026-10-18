@@ -25,7 +25,9 @@ dist/
 *.egg
 
 # Data Caches & Artifacts
-artifacts/*.parquet
+# Whitelist simulation parquets so cloud containers have instant pre-computed replay data
+!artifacts/ticks_*.parquet
+!artifacts/hourly_preds_*.parquet
 data/processed/
 
 # Presentation Media, Video & Launch Trailer

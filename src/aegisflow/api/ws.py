@@ -18,11 +18,15 @@ async def websocket_replay(websocket: WebSocket):
     await websocket.accept()
     app_state = get_app_state()
 
+    if not app_state.ready or not app_state.ticks_cache:
+        app_state.load_all()
+
     if app_state.df is None or not app_state.ticks_cache:
         await websocket.send_text(json.dumps({
             "type": "error",
-            "error": {"code": "NOT_READY", "message": "Simulation data not loaded"}
+            "error": {"code": "NOT_READY", "message": "Simulation data initializing"}
         }))
+        await asyncio.sleep(2.0)
         await websocket.close()
         return
 

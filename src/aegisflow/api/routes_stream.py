@@ -139,8 +139,11 @@ def get_stream_tick(
     strategies: str = Query("aegisflow,baseline2_static"),
     state: AppState = Depends(get_app_state),
 ):
+    if not state.ready or not state.ticks_cache:
+        state.load_all()
+
     if state.df is None or not state.ticks_cache:
-        raise HTTPException(status_code=503, detail={"error": {"code": "NOT_READY", "message": "Simulation cache not ready"}})
+        raise HTTPException(status_code=503, detail={"error": {"code": "NOT_READY", "message": "Simulation cache initializing"}})
 
     # Determine index
     if index is None:
@@ -169,8 +172,11 @@ def get_stream_range(
     if from_index >= to_index:
         raise HTTPException(status_code=400, detail={"error": {"code": "INVALID_RANGE", "message": "'from' must be strictly less than 'to'"}})
 
+    if not state.ready or not state.ticks_cache:
+        state.load_all()
+
     if state.df is None or not state.ticks_cache:
-        raise HTTPException(status_code=503, detail={"error": {"code": "NOT_READY", "message": "Simulation cache not ready"}})
+        raise HTTPException(status_code=503, detail={"error": {"code": "NOT_READY", "message": "Simulation cache initializing"}})
 
     req_strats = [s.strip() for s in strategies.split(",")]
     indices = np.arange(from_index, to_index, stride)

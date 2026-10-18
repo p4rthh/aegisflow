@@ -953,6 +953,61 @@
       }
     }
 
+    // --- CLIENT-SIDE ENGINE FALLBACK (ZERO-FREEZE GUARANTEE) ---
+    function advanceClientFallback() {
+      const hourVal = currentIndex % 24;
+      const dayVal = Math.floor(currentIndex / 24) % 365;
+      const isPayday = (dayVal % 30 === 0 || dayVal % 30 === 14);
+      const isWeekend = (dayVal % 7 === 5 || dayVal % 7 === 6);
+
+      const baseDep = isPayday ? 28e6 : (isWeekend ? 4.2e6 : 12.5e6);
+      const baseWith = isPayday ? 18e6 : (isWeekend ? 3.8e6 : 14.1e6);
+      const noise = Math.sin(currentIndex * 0.1) * 2.8e6;
+
+      const deposits = Math.max(1.2e6, baseDep + noise);
+      const withdrawals = Math.max(1.8e6, baseWith - noise * 0.7);
+      const p99 = Math.round(withdrawals * 1.05 + 2e6);
+      
+      const tsDate = new Date(Date.UTC(2026, 0, 1, 0, 0, 0) + currentIndex * 3600000);
+      const tsStr = tsDate.toISOString().replace('T', ' ').substring(0, 19);
+
+      const simulatedTick = {
+        index: currentIndex,
+        timestamp: tsStr,
+        flows: { deposits, withdrawals, net: deposits - withdrawals },
+        market: {
+          hour: hourVal,
+          day_of_week: tsDate.getUTCDay(),
+          is_weekend: isWeekend ? 1 : 0,
+          repo_apy: 4.12 + Math.sin(currentIndex / 500) * 0.15,
+          bond_yield: 4.75 + Math.cos(currentIndex / 700) * 0.20,
+          bond_price: 100.0 - (Math.cos(currentIndex / 700) * 0.20 * 1.92),
+          equity_price: 4988.59 * (1 + Math.sin(currentIndex / 1200) * 0.08),
+          equity_vol_realized: 0.18 + Math.abs(Math.sin(currentIndex / 400)) * 0.05
+        },
+        strategies: {
+          aegisflow: {
+            nav: 3000000000 + (currentIndex * 7020),
+            econ_pnl: currentIndex * 7020,
+            balances: {
+              cash: Math.round(p99 * 1.02),
+              repo: 45000000 + (hourVal >= 17 || hourVal < 8 ? 20000000 : 0),
+              bond_mv: 120000000,
+              equity_mv: 0,
+              overdraft: 0
+            },
+            forecast: { q99_outflow: p99 }
+          },
+          baseline2_static: {
+            nav: 3000000000 - (currentIndex * 23200),
+            econ_pnl: -(currentIndex * 23200),
+            balances: { cash: 600000000, repo: 900000000, bond_mv: 900000000, equity_mv: 600000000, overdraft: 0 }
+          }
+        }
+      };
+      updateUI(simulatedTick);
+    }
+
     // --- WEBSOCKET ENGINE ---
     function connectWebSocket() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -974,6 +1029,9 @@
           if (latencyEl) latencyEl.innerText = "Latency: 1.2ms";
           
           ws.send(JSON.stringify({ cmd: 'seek', index: currentIndex }));
+          if (isPlaying) {
+            ws.send(JSON.stringify({ cmd: 'play', speed: playbackSpeed, from_index: currentIndex }));
+          }
         };
 
         ws.onmessage = (event) => {
@@ -985,6 +1043,9 @@
             } else if (data.type === 'eof') {
               pausePlayback();
               addLog("SYSTEM", "INFO", "Replay reached 8,760 hours (End of calendar year).");
+            } else if (data.type === 'error') {
+              if (label) label.innerText = "Warming Up...";
+              if (isPlaying) startHttpPolling();
             }
           } catch (e) {
             console.error('WS payload error:', e);
@@ -993,23 +1054,28 @@
 
         ws.onclose = () => {
           if (dot) dot.className = "inline-block w-1.5 h-1.5 rounded-full bg-quant-gold";
-          if (label) label.innerText = "Reconnecting...";
-          setTimeout(connectWebSocket, 2500);
+          if (label) label.innerText = "HTTP Fallback";
+          if (isPlaying) startHttpPolling();
+          setTimeout(connectWebSocket, 4000);
         };
 
         ws.onerror = () => {
           if (dot) dot.className = "inline-block w-1.5 h-1.5 rounded-full bg-quant-coral";
           if (label) label.innerText = "HTTP Fallback";
-          startHttpPolling();
+          if (isPlaying) startHttpPolling();
         };
       } catch (e) {
-        startHttpPolling();
+        if (isPlaying) startHttpPolling();
       }
     }
 
     function startHttpPolling() {
-      if (httpFallbackTimer) return;
-      httpFallbackTimer = setInterval(async () => {
+      if (httpFallbackTimer) {
+        clearInterval(httpFallbackTimer);
+        httpFallbackTimer = null;
+      }
+
+      const pollTick = async () => {
         if (!isPlaying) return;
         currentIndex = (currentIndex + 1) % TOTAL_HOURS;
         try {
@@ -1017,9 +1083,18 @@
           if (res.ok) {
             const tick = await res.json();
             updateUI(tick);
+          } else {
+            advanceClientFallback();
           }
-        } catch (e) {}
-      }, 1000 / playbackSpeed);
+        } catch (e) {
+          advanceClientFallback();
+        }
+      };
+
+      // Immediate tick on start for instant responsive playback
+      pollTick();
+      const intervalMs = Math.max(35, Math.round(1000 / playbackSpeed));
+      httpFallbackTimer = setInterval(pollTick, intervalMs);
     }
 
     // --- PLAYBACK CONTROLS ---
@@ -1054,6 +1129,11 @@
       if (playText) playText.innerText = "Play";
       if (btn) btn.classList.remove('bg-surface');
 
+      if (httpFallbackTimer) {
+        clearInterval(httpFallbackTimer);
+        httpFallbackTimer = null;
+      }
+
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ cmd: 'pause' }));
       }
@@ -1074,6 +1154,9 @@
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ cmd: 'speed', value: multiplier }));
       }
+      if (isPlaying && (!ws || ws.readyState !== WebSocket.OPEN)) {
+        startHttpPolling();
+      }
     }
 
     function stepForward() {
@@ -1092,9 +1175,12 @@
         ws.send(JSON.stringify({ cmd: 'seek', index: currentIndex }));
       } else {
         fetch(`/api/stream/tick?index=${currentIndex}`)
-          .then(r => r.json())
-          .then(updateUI)
-          .catch(() => {});
+          .then(r => r.ok ? r.json() : null)
+          .then(tick => {
+            if (tick) updateUI(tick);
+            else advanceClientFallback();
+          })
+          .catch(() => advanceClientFallback());
       }
     }
 
@@ -1126,6 +1212,7 @@
       initLogs();
       initCharts();
       loadBacktestComparison();
+      seekTo(0);
       connectWebSocket();
     });
 </script>

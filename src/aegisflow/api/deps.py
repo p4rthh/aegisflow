@@ -68,7 +68,24 @@ class AppState:
         for strat in ["baseline0_cash", "baseline1_greedy", "baseline2_static", "aegisflow"]:
             t_file = art_dir / f"ticks_{strat}.parquet"
             if t_file.exists():
-                self.ticks_cache[strat] = pd.read_parquet(t_file)
+                try:
+                    self.ticks_cache[strat] = pd.read_parquet(t_file)
+                except Exception:
+                    pass
+
+        # Auto-compute simulation if parquet files are missing in fresh deployment
+        if self.df is not None and len(self.ticks_cache) < 4:
+            try:
+                from aegisflow.sim.backtester import run_comparative_backtest
+                res = run_comparative_backtest(df=self.df, aum0=self.config.aum0, config=self.config, save_artifacts=True)
+                if not self.backtest_data:
+                    self.backtest_data = res
+                for strat in ["baseline0_cash", "baseline1_greedy", "baseline2_static", "aegisflow"]:
+                    t_file = art_dir / f"ticks_{strat}.parquet"
+                    if t_file.exists():
+                        self.ticks_cache[strat] = pd.read_parquet(t_file)
+            except Exception as e:
+                print(f"[AppState] Error auto-generating ticks: {e}")
 
         # Predictions parquet (latest)
         preds_files = sorted(list(art_dir.glob("hourly_preds_*.parquet")), key=lambda p: p.stat().st_mtime, reverse=True)
