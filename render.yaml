@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: aegisflow
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: standard
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 8000
